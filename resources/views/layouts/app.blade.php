@@ -6,6 +6,9 @@
     <meta name="color-scheme" content="dark light">
     <meta name="description" content="Daily utilities for developers — JSON Formatter, Case Converter, Constant Generator, BEM Generator and more.">
     <title>@yield('title', 'Dev Toolkit')</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="h-full antialiased" style="background:#020617">

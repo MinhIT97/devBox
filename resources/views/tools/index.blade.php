@@ -5,6 +5,11 @@
 @section('content')
 <div x-data="devToolkitApp()" x-init="init()" :class="{ 'light': !dark }" class="app-wrapper">
 
+    {{-- Ambient orbs --}}
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
     {{-- ══ SIDEBAR ══ --}}
     <aside class="sidebar">
 
@@ -27,12 +32,31 @@
             ></button>
         </div>
 
-        {{-- Nav label --}}
-        <span class="nav-section-label">Tools</span>
+        {{-- Group: Formatters --}}
+        <span class="nav-section-label">Formatters</span>
+        <nav class="sidebar-nav" aria-label="Formatter tools">
+            @php
+            $formatters = ['json','html','diff','case','constant','bem'];
+            @endphp
+            <template x-for="tool in tools.filter(t => ['json','html','diff','case','constant','bem'].includes(t.id))" :key="tool.id">
+                <button
+                    type="button"
+                    class="tool-nav"
+                    :class="{ 'tool-nav-active': activeTool === tool.id }"
+                    @click="selectTool(tool.id)"
+                    :id="'nav-' + tool.id"
+                    :aria-current="activeTool === tool.id ? 'page' : null"
+                >
+                    <span class="nav-title" x-text="tool.icon + ' ' + tool.title"></span>
+                    <span class="nav-desc" x-text="tool.description"></span>
+                </button>
+            </template>
+        </nav>
 
-        {{-- Nav items --}}
-        <nav class="sidebar-nav" aria-label="Tool navigation">
-            <template x-for="tool in tools" :key="tool.id">
+        {{-- Group: Converters & Generators --}}
+        <span class="nav-section-label">Converters & Generators</span>
+        <nav class="sidebar-nav" aria-label="Converter tools">
+            <template x-for="tool in tools.filter(t => ['base64','url','jwt','uuid','epoch','regex','color'].includes(t.id))" :key="tool.id">
                 <button
                     type="button"
                     class="tool-nav"
@@ -50,7 +74,8 @@
         {{-- Footer --}}
         <div class="sidebar-footer">
             <span>⚙️</span>
-            <span>v1.0 &mdash; Open in browser</span>
+            <span>Dev Toolkit</span>
+            <span class="sidebar-footer-badge">v1.1</span>
         </div>
     </aside>
 
