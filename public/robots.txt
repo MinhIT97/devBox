@@ -1,2 +1,4 @@
 User-agent: *
 Disallow:
+
+Sitemap: https://toolkit.minhnv.work/sitemap.xml
