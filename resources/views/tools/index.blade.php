@@ -710,8 +710,27 @@
                         <input id="color-input" type="text" class="input-shell" x-model="colorTool.input" @input="persistColorInput()" placeholder="#06b6d4, rgb(6, 182, 212), HSL(188, 95%, 43%)">
                     </div>
                     <div style="display:flex; flex-direction:column">
-                        <span class="field-label">Preview</span>
-                        <div class="color-preview-box" :style="'background-color: ' + (colorTool.hex || 'transparent')"></div>
+                        <span class="field-label">Picker / Preview</span>
+                        <button
+                            type="button"
+                            class="color-preview-box"
+                            :style="'background-color: ' + (colorTool.hex || 'transparent')"
+                            @click="$refs.nativePicker.click()"
+                            title="Click to open color picker"
+                        >
+                            <div class="color-preview-overlay">
+                                <svg class="color-picker-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                </svg>
+                            </div>
+                        </button>
+                        <input
+                            type="color"
+                            x-ref="nativePicker"
+                            style="opacity: 0; position: absolute; width: 0; height: 0; pointer-events: none;"
+                            :value="colorTool.hex || '#06b6d4'"
+                            @input="colorTool.input = $event.target.value; persistColorInput()"
+                        >
                     </div>
                 </div>
 
