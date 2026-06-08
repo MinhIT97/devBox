@@ -627,3 +627,98 @@ html:not(.dark),
     background: rgba(6,182,212,0.25);
     color: #e0f9ff;
 }
+
+/* ─── Diff Output ────────────────────────────────────────────── */
+.diff-output-container {
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    overflow: auto;
+    max-height: 400px;
+    line-height: 1.6;
+}
+.diff-line {
+    display: flex;
+    padding: 2px 12px;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+.diff-line-prefix {
+    width: 20px;
+    user-select: none;
+    opacity: 0.6;
+}
+.diff-line-equal {
+    color: var(--text-secondary);
+}
+.diff-line-added {
+    background: rgba(16, 185, 129, 0.12);
+    color: #6ee7b7;
+}
+.light .diff-line-added {
+    background: rgba(16, 185, 129, 0.08);
+    color: #047857;
+}
+.diff-line-removed {
+    background: rgba(244, 63, 94, 0.12);
+    color: #fda4af;
+}
+.light .diff-line-removed {
+    background: rgba(244, 63, 94, 0.08);
+    color: #be123c;
+}
+.diff-empty {
+    padding: 24px;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+/* ─── Regex Matches ──────────────────────────────────────────── */
+.regex-matches-container {
+    max-height: 240px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.regex-match-item {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface-3);
+    padding: 8px 12px;
+}
+.regex-match-idx {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+}
+.regex-match-pos {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+.regex-match-val {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-primary);
+    word-break: break-all;
+}
+.regex-empty {
+    text-align: center;
+    padding: 24px;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+/* ─── Color Preview ─── */
+.color-preview-box {
+    width: 100%;
+    height: 100%;
+    min-height: 40px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    transition: background-color 200ms ease;
+}
+

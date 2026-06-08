@@ -1,0 +1,16 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: devbox-app
+    restart: always
+    ports:
+      - '8083:80'
+    volumes:
+      - db-data:/var/www/html/database
+      - storage-data:/var/www/html/storage
+
+volumes:
+  db-data:
+  storage-data:
