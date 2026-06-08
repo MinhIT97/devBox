@@ -273,7 +273,21 @@
                     <button id="json-validate-btn" type="button" class="btn"         @click="validateJson()">Validate</button>
                     <button id="json-swap-btn"     type="button" class="btn"         @click="swapJson()">Swap</button>
                     <button id="json-copy-btn"     type="button" class="btn"         @click="copyJsonOutput()">Copy Output</button>
-                    <button id="json-clear-btn"    type="button" class="btn-danger"  @click="clearInput('json')">Clear</button>
+                    <button id="json-share-btn"    type="button" class="btn"         @click="shareJson()" :disabled="jsonShare.loading">
+                        <template x-if="!jsonShare.loading">
+                            <span style="display:inline-flex;align-items:center;gap:5px">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                                Share
+                            </span>
+                        </template>
+                        <template x-if="jsonShare.loading">
+                            <span style="display:inline-flex;align-items:center;gap:5px">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                                Đang tạo...
+                            </span>
+                        </template>
+                    </button>
+                    <button id="json-clear-btn"    type="button" class="btn-danger"  @click="clearInput('json'); resetShareUrl()">Clear</button>
                 </div>
 
                 <div style="display:grid; gap:16px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr))">
@@ -306,6 +320,44 @@
                    x-text="json.message"
                    style="margin-top:12px"
                 ></p>
+
+                {{-- Share Link Result --}}
+                <div
+                    x-show="jsonShare.url || jsonShare.error"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 transform scale-98"
+                    x-transition:enter-end="opacity-100 transform scale-100"
+                    class="json-share-panel"
+                    style="margin-top:14px"
+                >
+                    <template x-if="jsonShare.url">
+                        <div class="json-share-inner">
+                            <div class="json-share-header">
+                                <div style="display:flex;align-items:center;gap:7px">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent)"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                                    <span style="font-size:12px;font-weight:600;color:var(--text-primary)">Link chia sẻ</span>
+                                    <span class="json-share-badge">⏱ Hết hạn sau 24h</span>
+                                </div>
+                                <button type="button" class="json-share-close" @click="resetShareUrl()" title="Đóng">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                            </div>
+                            <div class="json-share-url-row">
+                                <code class="json-share-url" x-text="jsonShare.url"></code>
+                                <button type="button" class="btn" style="min-height:32px;padding:0 12px;font-size:12px;white-space:nowrap" @click="copyShareUrl()">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                                    Copy URL
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                    <template x-if="jsonShare.error && !jsonShare.url">
+                        <div style="padding:12px 16px;color:var(--error);font-size:13px;display:flex;align-items:center;gap:8px">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            <span x-text="jsonShare.error"></span>
+                        </div>
+                    </template>
+                </div>
             </section>
 
             {{-- ── Case Converter ── --}}
@@ -334,6 +386,18 @@
                                 <div class="case-output-row">
                                     <span class="case-label" x-text="row.label"></span>
                                     <code class="case-value" x-text="row.value"></code>
+                                    <button
+                                        type="button"
+                                        class="case-copy-btn"
+                                        @click="copy(row.value)"
+                                        :title="'Copy ' + row.label"
+                                        aria-label="Copy value"
+                                    >
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                        </svg>
+                                    </button>
                                 </div>
                             </template>
                         </div>

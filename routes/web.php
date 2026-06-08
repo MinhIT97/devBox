@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\JsonShareController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/sw.js', function () {
@@ -11,3 +12,9 @@ Route::get('/sw.js', function () {
 Route::get('/', function () {
     return view('tools.index');
 });
+
+// JSON Share
+Route::post('/api/json/share',          [JsonShareController::class, 'store']);
+Route::get('/api/json/share/{slug}',    [JsonShareController::class, 'fetch']);
+Route::get('/s/{slug}',                 [JsonShareController::class, 'show']);
+

@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="color-scheme" content="dark light">
     <meta name="description" content="All-in-one Dev Toolkit: format and minify JSON/HTML, compare code diffs, encode/decode Base64 and URLs, parse JWTs, generate UUIDs and passwords, test regex, convert epoch timestamps, and colors.">
     <meta name="keywords" content="developer tools, json formatter, base64 encoder, url encoder, jwt decoder, diff checker, uuid generator, epoch converter, regex tester, color converter, web utility, dev tools">

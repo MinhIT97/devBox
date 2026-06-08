@@ -142,6 +142,12 @@ window.devToolkitApp = function devToolkitApp() {
             message: 'Paste JSON then choose Format, Minify or Validate.',
             error: false,
         },
+        jsonShare: {
+            loading: false,
+            url: '',
+            expiresAt: '',
+            error: '',
+        },
         caseTool: {
             input: loadFromLocalStorage('dev-toolkit.case.input', 'user_name'),
             rows: [],
@@ -242,6 +248,16 @@ window.devToolkitApp = function devToolkitApp() {
             setInterval(() => {
                 this.epochTool.currentEpoch = Math.floor(Date.now() / 1000);
             }, 1000);
+
+            // Auto-load shared JSON from URL ?share=
+            const params = new URLSearchParams(window.location.search);
+            const shareSlug = params.get('share');
+            if (shareSlug) {
+                this.selectTool('json');
+                this.loadSharedJson(shareSlug);
+                // Xoá query param khỏi URL mà không reload
+                window.history.replaceState({}, '', window.location.pathname);
+            }
         },
 
         currentTool() {
@@ -394,6 +410,64 @@ window.devToolkitApp = function devToolkitApp() {
         },
         copyJsonOutput() { this.copy(this.json.output); },
         persistJsonInput() { saveToLocalStorage('dev-toolkit.json.input', this.json.input); },
+
+        // JSON Share
+        async shareJson() {
+            const content = this.json.output || this.json.input;
+            if (!content.trim()) {
+                this.showToast('Không có nội dung để share!');
+                return;
+            }
+            this.jsonShare.loading = true;
+            this.jsonShare.url = '';
+            this.jsonShare.error = '';
+            try {
+                const res = await fetch('/api/json/share', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ content }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || 'Lỗi server');
+                this.jsonShare.url = data.url;
+                this.jsonShare.expiresAt = data.expires_at;
+                this.showToast('Link chia sẻ đã được tạo!');
+            } catch (e) {
+                this.jsonShare.error = e.message;
+            } finally {
+                this.jsonShare.loading = false;
+            }
+        },
+        async loadSharedJson(slug) {
+            try {
+                const res = await fetch(`/api/json/share/${slug}`, {
+                    headers: { 'Accept': 'application/json' },
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Link hết hạn');
+                this.json.input = data.content;
+                this.json.output = '';
+                this.json.error = false;
+                this.json.message = 'Đã load nội dung từ link chia sẻ.';
+                saveToLocalStorage('dev-toolkit.json.input', data.content);
+            } catch (e) {
+                this.json.error = true;
+                this.json.message = e.message;
+            }
+        },
+        copyShareUrl() {
+            if (this.jsonShare.url) {
+                this.copy(this.jsonShare.url);
+            }
+        },
+        resetShareUrl() {
+            this.jsonShare.url = '';
+            this.jsonShare.error = '';
+        },
 
         // Case Converter
         persistCaseInput() {
