@@ -16,7 +16,11 @@
         {{-- Logo + Header --}}
         <div class="sidebar-header">
             <div class="sidebar-logo">
-                <div class="sidebar-logo-icon">⚡</div>
+                <div class="sidebar-logo-icon">
+                    <svg class="logo-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                </div>
                 <span class="sidebar-title">Dev Toolkit</span>
             </div>
             <p class="sidebar-subtitle">Daily utilities for developers.</p>
@@ -28,8 +32,23 @@
                 class="theme-btn"
                 @click="toggleTheme()"
                 :title="dark ? 'Switch to Light mode' : 'Switch to Dark mode'"
-                x-text="dark ? '☀️' : '🌙'"
-            ></button>
+                aria-label="Toggle theme"
+            >
+                <svg x-show="dark" class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <svg x-show="!dark" class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+            </button>
         </div>
 
         {{-- Group: Formatters --}}
@@ -47,7 +66,10 @@
                     :id="'nav-' + tool.id"
                     :aria-current="activeTool === tool.id ? 'page' : null"
                 >
-                    <span class="nav-title" x-text="tool.icon + ' ' + tool.title"></span>
+                    <span class="nav-title">
+                        <span x-html="icons[tool.id]" style="display:inline-flex; align-items:center"></span>
+                        <span x-text="tool.title"></span>
+                    </span>
                     <span class="nav-desc" x-text="tool.description"></span>
                 </button>
             </template>
@@ -65,7 +87,10 @@
                     :id="'nav-' + tool.id"
                     :aria-current="activeTool === tool.id ? 'page' : null"
                 >
-                    <span class="nav-title" x-text="tool.icon + ' ' + tool.title"></span>
+                    <span class="nav-title">
+                        <span x-html="icons[tool.id]" style="display:inline-flex; align-items:center"></span>
+                        <span x-text="tool.title"></span>
+                    </span>
                     <span class="nav-desc" x-text="tool.description"></span>
                 </button>
             </template>
@@ -73,7 +98,10 @@
 
         {{-- Footer --}}
         <div class="sidebar-footer">
-            <span>⚙️</span>
+            <svg class="footer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
             <span>Dev Toolkit</span>
             <span class="sidebar-footer-badge">v1.1</span>
         </div>
@@ -103,7 +131,9 @@
                     role="status"
                     aria-live="polite"
                 >
-                    <span>✓</span>
+                    <svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
                     <span x-text="toast"></span>
                 </div>
             </header>
@@ -111,12 +141,12 @@
             {{-- ── JSON Formatter ── --}}
             <section x-show="activeTool === 'json'" x-cloak>
                 <div class="toolbar">
-                    <button id="json-format-btn"   type="button" class="btn-primary" @click="formatJson()">⚡ Format</button>
-                    <button id="json-minify-btn"   type="button" class="btn"         @click="minifyJson()">⬜ Minify</button>
-                    <button id="json-validate-btn" type="button" class="btn"         @click="validateJson()">✓ Validate</button>
-                    <button id="json-swap-btn"     type="button" class="btn"         @click="swapJson()">⇄ Swap</button>
-                    <button id="json-copy-btn"     type="button" class="btn"         @click="copyJsonOutput()">⎘ Copy output</button>
-                    <button id="json-clear-btn"    type="button" class="btn-danger"  @click="clearInput('json')">✕ Clear</button>
+                    <button id="json-format-btn"   type="button" class="btn-primary" @click="formatJson()">Format</button>
+                    <button id="json-minify-btn"   type="button" class="btn"         @click="minifyJson()">Minify</button>
+                    <button id="json-validate-btn" type="button" class="btn"         @click="validateJson()">Validate</button>
+                    <button id="json-swap-btn"     type="button" class="btn"         @click="swapJson()">Swap</button>
+                    <button id="json-copy-btn"     type="button" class="btn"         @click="copyJsonOutput()">Copy Output</button>
+                    <button id="json-clear-btn"    type="button" class="btn-danger"  @click="clearInput('json')">Clear</button>
                 </div>
 
                 <div style="display:grid; gap:16px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr))">
@@ -154,9 +184,9 @@
             {{-- ── Case Converter ── --}}
             <section x-show="activeTool === 'case'" x-cloak>
                 <div class="toolbar">
-                    <button id="case-convert-btn" type="button" class="btn-primary" @click="convertCase()">⚡ Convert</button>
-                    <button id="case-copy-btn"    type="button" class="btn"         @click="copyCaseOutput()">⎘ Copy output</button>
-                    <button id="case-clear-btn"   type="button" class="btn-danger"  @click="clearInput('case')">✕ Clear</button>
+                    <button id="case-convert-btn" type="button" class="btn-primary" @click="convertCase()">Convert</button>
+                    <button id="case-copy-btn"    type="button" class="btn"         @click="copyCaseOutput()">Copy Output</button>
+                    <button id="case-clear-btn"   type="button" class="btn-danger"  @click="clearInput('case')">Clear</button>
                 </div>
 
                 <div style="display:grid; gap:16px; grid-template-columns: minmax(0,0.9fr) minmax(0,1.1fr)">
@@ -187,15 +217,15 @@
             {{-- ── Constant Generator ── --}}
             <section x-show="activeTool === 'constant'" x-cloak>
                 <div class="toolbar">
-                    <button id="const-generate-btn" type="button" class="btn-primary" @click="generateConstant()">⚡ Generate</button>
+                    <button id="const-generate-btn" type="button" class="btn-primary" @click="generateConstant()">Generate</button>
                     <select id="const-mode-select" class="select-shell" x-model="constantTool.mode" @change="saveConstantMode(); generateConstant()">
                         <option value="php-const">PHP const</option>
                         <option value="php-enum">PHP enum (Laravel)</option>
                         <option value="js-object">JavaScript object</option>
                         <option value="ts-enum">TypeScript enum</option>
                     </select>
-                    <button id="const-copy-btn"  type="button" class="btn"        @click="copyConstantOutput()">⎘ Copy output</button>
-                    <button id="const-clear-btn" type="button" class="btn-danger" @click="clearInput('constant')">✕ Clear</button>
+                    <button id="const-copy-btn"  type="button" class="btn"        @click="copyConstantOutput()">Copy Output</button>
+                    <button id="const-clear-btn" type="button" class="btn-danger" @click="clearInput('constant')">Clear</button>
                 </div>
 
                 <div style="display:grid; gap:16px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr))">
@@ -227,9 +257,9 @@
             {{-- ── BEM Generator ── --}}
             <section x-show="activeTool === 'bem'" x-cloak>
                 <div class="toolbar">
-                    <button id="bem-generate-btn" type="button" class="btn-primary" @click="generateBem()">⚡ Generate</button>
-                    <button id="bem-copy-btn"     type="button" class="btn"        @click="copyBemOutput()">⎘ Copy output</button>
-                    <button id="bem-clear-btn"    type="button" class="btn-danger" @click="clearInput('bem')">✕ Clear</button>
+                    <button id="bem-generate-btn" type="button" class="btn-primary" @click="generateBem()">Generate</button>
+                    <button id="bem-copy-btn"     type="button" class="btn"        @click="copyBemOutput()">Copy Output</button>
+                    <button id="bem-clear-btn"    type="button" class="btn-danger" @click="clearInput('bem')">Clear</button>
                 </div>
 
                 <div style="display:grid; gap:16px; grid-template-columns: minmax(0,0.75fr) minmax(0,1.25fr)">
@@ -267,11 +297,11 @@
             {{-- ── Base64 Tool ── --}}
             <section x-show="activeTool === 'base64'" x-cloak>
                 <div class="toolbar">
-                    <button id="base64-encode-btn" type="button" class="btn-primary" @click="runBase64Encode()">🔒 Encode</button>
-                    <button id="base64-decode-btn" type="button" class="btn"         @click="runBase64Decode()">🔑 Decode</button>
-                    <button id="base64-swap-btn"   type="button" class="btn"         @click="swapBase64()">⇄ Swap</button>
-                    <button id="base64-copy-btn"   type="button" class="btn"         @click="copy(base64.output)">⎘ Copy output</button>
-                    <button id="base64-clear-btn"  type="button" class="btn-danger"  @click="clearInput('base64')">✕ Clear</button>
+                    <button id="base64-encode-btn" type="button" class="btn-primary" @click="runBase64Encode()">Encode</button>
+                    <button id="base64-decode-btn" type="button" class="btn"         @click="runBase64Decode()">Decode</button>
+                    <button id="base64-swap-btn"   type="button" class="btn"         @click="swapBase64()">Swap</button>
+                    <button id="base64-copy-btn"   type="button" class="btn"         @click="copy(base64.output)">Copy Output</button>
+                    <button id="base64-clear-btn"  type="button" class="btn-danger"  @click="clearInput('base64')">Clear</button>
                 </div>
 
                 <div style="display:grid; gap:16px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr))">
@@ -308,11 +338,11 @@
             {{-- ── URL Tool ── --}}
             <section x-show="activeTool === 'url'" x-cloak>
                 <div class="toolbar">
-                    <button id="url-encode-btn" type="button" class="btn-primary" @click="runUrlEncode()">🔗 Encode</button>
-                    <button id="url-decode-btn" type="button" class="btn"         @click="runUrlDecode()">🔓 Decode</button>
-                    <button id="url-swap-btn"   type="button" class="btn"         @click="swapUrl()">⇄ Swap</button>
-                    <button id="url-copy-btn"   type="button" class="btn"         @click="copy(urlTool.output)">⎘ Copy output</button>
-                    <button id="url-clear-btn"  type="button" class="btn-danger"  @click="clearInput('url')">✕ Clear</button>
+                    <button id="url-encode-btn" type="button" class="btn-primary" @click="runUrlEncode()">Encode</button>
+                    <button id="url-decode-btn" type="button" class="btn"         @click="runUrlDecode()">Decode</button>
+                    <button id="url-swap-btn"   type="button" class="btn"         @click="swapUrl()">Swap</button>
+                    <button id="url-copy-btn"   type="button" class="btn"         @click="copy(urlTool.output)">Copy Output</button>
+                    <button id="url-clear-btn"  type="button" class="btn-danger"  @click="clearInput('url')">Clear</button>
                 </div>
 
                 <div style="display:grid; gap:16px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr))">
@@ -349,10 +379,10 @@
             {{-- ── JWT Decoder ── --}}
             <section x-show="activeTool === 'jwt'" x-cloak>
                 <div class="toolbar">
-                    <button id="jwt-decode-btn" type="button" class="btn-primary" @click="runJwtDecode()">🎫 Decode</button>
-                    <button id="jwt-copy-header-btn"  type="button" class="btn" @click="copy(jwtTool.header)">⎘ Copy Header</button>
-                    <button id="jwt-copy-payload-btn" type="button" class="btn" @click="copy(jwtTool.payload)">⎘ Copy Payload</button>
-                    <button id="jwt-clear-btn"  type="button" class="btn-danger"  @click="clearInput('jwt')">✕ Clear</button>
+                    <button id="jwt-decode-btn" type="button" class="btn-primary" @click="runJwtDecode()">Decode</button>
+                    <button id="jwt-copy-header-btn"  type="button" class="btn" @click="copy(jwtTool.header)">Copy Header</button>
+                    <button id="jwt-copy-payload-btn" type="button" class="btn" @click="copy(jwtTool.payload)">Copy Payload</button>
+                    <button id="jwt-clear-btn"  type="button" class="btn-danger"  @click="clearInput('jwt')">Clear</button>
                 </div>
 
                 <div style="display:flex; flex-direction:column; gap:16px">
@@ -404,8 +434,8 @@
             {{-- ── Diff Checker ── --}}
             <section x-show="activeTool === 'diff'" x-cloak>
                 <div class="toolbar">
-                    <button id="diff-compare-btn" type="button" class="btn-primary" @click="runDiff()">📊 Compare</button>
-                    <button id="diff-clear-btn"   type="button" class="btn-danger"  @click="clearInput('diff')">✕ Clear</button>
+                    <button id="diff-compare-btn" type="button" class="btn-primary" @click="runDiff()">Compare</button>
+                    <button id="diff-clear-btn"   type="button" class="btn-danger"  @click="clearInput('diff')">Clear</button>
                 </div>
 
                 <div style="display:grid; gap:16px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr))">
@@ -454,7 +484,7 @@
                         <label class="field-label">UUID v4 Generator</label>
                         <div style="display:flex; gap:8px; margin-bottom:12px">
                             <input type="number" class="input-shell" style="max-width:100px" x-model="uuidTool.uuidCount" min="1" max="50">
-                            <button id="uuid-gen-btn" type="button" class="btn-primary" style="flex:1" @click="generateUuids()">⚡ Generate UUIDs</button>
+                            <button id="uuid-gen-btn" type="button" class="btn-primary" style="flex:1" @click="generateUuids()">Generate UUIDs</button>
                         </div>
                         <textarea
                             class="textarea-shell"
@@ -463,7 +493,7 @@
                             readonly
                             placeholder="Generated UUIDs will appear here..."
                         ></textarea>
-                        <button type="button" class="btn" style="margin-top:12px; width:100%" @click="copy(uuidTool.uuidOutput)">⎘ Copy UUIDs</button>
+                        <button type="button" class="btn" style="margin-top:12px; width:100%" @click="copy(uuidTool.uuidOutput)">Copy UUIDs</button>
                     </div>
 
                     <div class="tool-panel">
@@ -484,7 +514,7 @@
                                     <input type="checkbox" x-model="uuidTool.useSymbols"> Symbols
                                 </label>
                             </div>
-                            <button id="pass-gen-btn" type="button" class="btn-primary" @click="generatePasswords()">⚡ Generate Password</button>
+                            <button id="pass-gen-btn" type="button" class="btn-primary" @click="generatePasswords()">Generate Password</button>
                         </div>
                         <textarea
                             class="textarea-shell"
@@ -493,7 +523,7 @@
                             readonly
                             placeholder="Generated password will appear here..."
                         ></textarea>
-                        <button type="button" class="btn" style="margin-top:12px; width:100%" @click="copy(uuidTool.passwordOutput)">⎘ Copy Password</button>
+                        <button type="button" class="btn" style="margin-top:12px; width:100%" @click="copy(uuidTool.passwordOutput)">Copy Password</button>
                     </div>
                 </div>
             </section>
@@ -501,11 +531,11 @@
             {{-- ── HTML Formatter ── --}}
             <section x-show="activeTool === 'html'" x-cloak>
                 <div class="toolbar">
-                    <button id="html-format-btn" type="button" class="btn-primary" @click="runHtmlFormat()">⚡ Format</button>
-                    <button id="html-minify-btn" type="button" class="btn"         @click="runHtmlMinify()">⬜ Minify</button>
-                    <button id="html-swap-btn"   type="button" class="btn"         @click="swapHtml()">⇄ Swap</button>
-                    <button id="html-copy-btn"   type="button" class="btn"         @click="copy(htmlTool.output)">⎘ Copy output</button>
-                    <button id="html-clear-btn"  type="button" class="btn-danger"  @click="clearInput('html')">✕ Clear</button>
+                    <button id="html-format-btn" type="button" class="btn-primary" @click="runHtmlFormat()">Format</button>
+                    <button id="html-minify-btn" type="button" class="btn"         @click="runHtmlMinify()">Minify</button>
+                    <button id="html-swap-btn"   type="button" class="btn"         @click="swapHtml()">Swap</button>
+                    <button id="html-copy-btn"   type="button" class="btn"         @click="copy(htmlTool.output)">Copy Output</button>
+                    <button id="html-clear-btn"  type="button" class="btn-danger"  @click="clearInput('html')">Clear</button>
                 </div>
 
                 <div style="display:grid; gap:16px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr))">
@@ -546,7 +576,7 @@
                         <span class="field-label" style="margin:0">Current Unix Timestamp Clock</span>
                         <div style="font-family:var(--font-mono); font-size:24px; font-weight:700; color:var(--accent); margin-top:4px" x-text="epochTool.currentEpoch"></div>
                     </div>
-                    <button type="button" class="btn" @click="copy(epochTool.currentEpoch)">⎘ Copy Current Epoch</button>
+                    <button type="button" class="btn" @click="copy(epochTool.currentEpoch)">Copy Current Epoch</button>
                 </div>
 
                 <div style="display:grid; gap:16px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr))">
@@ -558,14 +588,40 @@
                                 <button type="button" class="btn-primary" @click="epochTool.epochInput = epochTool.currentEpoch; runEpochToDate()">Now</button>
                             </div>
                             <span class="field-label">Date Outputs</span>
-                            <textarea
-                                class="textarea-shell"
-                                style="min-height: 120px; font-family:var(--font-mono)"
-                                x-model="epochTool.epochOutput"
-                                readonly
-                            ></textarea>
+                            <div class="case-output-table" style="margin-top:8px" x-show="epochTool.outputs">
+                                <div class="case-output-row">
+                                    <span class="case-label">Format (h:i:s d/m/y)</span>
+                                    <div style="display:flex; justify-content:space-between; align-items:center; width:100%">
+                                        <code class="case-value" x-text="epochTool.outputs ? epochTool.outputs.custom : ''"></code>
+                                        <button type="button" class="btn" style="min-height:28px; padding:0 8px; font-size:11px" @click="copy(epochTool.outputs.custom)">Copy</button>
+                                    </div>
+                                </div>
+                                <div class="case-output-row">
+                                    <span class="case-label">ISO 8601</span>
+                                    <div style="display:flex; justify-content:space-between; align-items:center; width:100%">
+                                        <code class="case-value" x-text="epochTool.outputs ? epochTool.outputs.iso : ''"></code>
+                                        <button type="button" class="btn" style="min-height:28px; padding:0 8px; font-size:11px" @click="copy(epochTool.outputs.iso)">Copy</button>
+                                    </div>
+                                </div>
+                                <div class="case-output-row">
+                                    <span class="case-label">UTC</span>
+                                    <div style="display:flex; justify-content:space-between; align-items:center; width:100%">
+                                        <code class="case-value" x-text="epochTool.outputs ? epochTool.outputs.utc : ''"></code>
+                                        <button type="button" class="btn" style="min-height:28px; padding:0 8px; font-size:11px" @click="copy(epochTool.outputs.utc)">Copy</button>
+                                    </div>
+                                </div>
+                                <div class="case-output-row">
+                                    <span class="case-label">Local</span>
+                                    <div style="display:flex; justify-content:space-between; align-items:center; width:100%">
+                                        <code class="case-value" x-text="epochTool.outputs ? epochTool.outputs.local : ''"></code>
+                                        <button type="button" class="btn" style="min-height:28px; padding:0 8px; font-size:11px" @click="copy(epochTool.outputs.local)">Copy</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="json-status json-status-error" x-show="epochTool.error" style="margin-top:8px">
+                                <span x-text="epochTool.errorMessage"></span>
+                            </div>
                         </div>
-                        <button type="button" class="btn" style="margin-top:12px; width:100%" @click="copy(epochTool.epochOutput)">⎘ Copy Outputs</button>
                     </div>
 
                     <div class="tool-panel" style="display:flex; flex-direction:column; justify-content:space-between">
@@ -578,7 +634,7 @@
                             <span class="field-label">Epoch Output</span>
                             <div style="font-family:var(--font-mono); font-size:20px; font-weight:700; padding:12px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface-2)" x-text="epochTool.dateOutput"></div>
                         </div>
-                        <button type="button" class="btn" style="margin-top:12px; width:100%" @click="copy(epochTool.dateOutput)">⎘ Copy Epoch</button>
+                        <button type="button" class="btn" style="margin-top:12px; width:100%" @click="copy(epochTool.dateOutput)">Copy Epoch</button>
                     </div>
                 </div>
             </section>
@@ -586,8 +642,8 @@
             {{-- ── Regex Tester ── --}}
             <section x-show="activeTool === 'regex'" x-cloak>
                 <div class="toolbar">
-                    <button id="regex-test-btn" type="button" class="btn-primary" @click="runRegex()">🔍 Test Match</button>
-                    <button id="regex-clear-btn" type="button" class="btn-danger"  @click="clearInput('regex')">✕ Clear Text</button>
+                    <button id="regex-test-btn" type="button" class="btn-primary" @click="runRegex()">Test Match</button>
+                    <button id="regex-clear-btn" type="button" class="btn-danger"  @click="clearInput('regex')">Clear Text</button>
                 </div>
 
                 <div style="display:flex; flex-direction:column; gap:16px">
@@ -666,21 +722,21 @@
                             <span class="case-label">HEX</span>
                             <div style="display:flex; justify-content:space-between; align-items:center; width:100%">
                                 <code class="case-value" x-text="colorTool.hex || '-'"></code>
-                                <button type="button" class="btn" style="min-height:28px; padding:0 8px; font-size:11px" @click="copy(colorTool.hex)" :disabled="!colorTool.hex">⎘ Copy</button>
+                                <button type="button" class="btn" style="min-height:28px; padding:0 8px; font-size:11px" @click="copy(colorTool.hex)" :disabled="!colorTool.hex">Copy</button>
                             </div>
                         </div>
                         <div class="case-output-row">
                             <span class="case-label">RGB</span>
                             <div style="display:flex; justify-content:space-between; align-items:center; width:100%">
                                 <code class="case-value" x-text="colorTool.rgb || '-'"></code>
-                                <button type="button" class="btn" style="min-height:28px; padding:0 8px; font-size:11px" @click="copy(colorTool.rgb)" :disabled="!colorTool.rgb">⎘ Copy</button>
+                                <button type="button" class="btn" style="min-height:28px; padding:0 8px; font-size:11px" @click="copy(colorTool.rgb)" :disabled="!colorTool.rgb">Copy</button>
                             </div>
                         </div>
                         <div class="case-output-row">
                             <span class="case-label">HSL</span>
                             <div style="display:flex; justify-content:space-between; align-items:center; width:100%">
                                 <code class="case-value" x-text="colorTool.hsl || '-'"></code>
-                                <button type="button" class="btn" style="min-height:28px; padding:0 8px; font-size:11px" @click="copy(colorTool.hsl)" :disabled="!colorTool.hsl">⎘ Copy</button>
+                                <button type="button" class="btn" style="min-height:28px; padding:0 8px; font-size:11px" @click="copy(colorTool.hsl)" :disabled="!colorTool.hsl">Copy</button>
                             </div>
                         </div>
                     </div>

@@ -28,20 +28,35 @@ import {
 
 window.devToolkitApp = function devToolkitApp() {
     return {
+        icons: {
+            json: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1"/><path d="M16 21h1a2 2 0 0 0 2-2v-5a2 2 0 0 1 2-2 2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"/></svg>`,
+            case: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 16 4-10 4 10"/><path d="M4.5 12h5"/><path d="M15 16V9a3 3 0 0 1 6 0v7"/><path d="M21 12h-6"/></svg>`,
+            constant: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>`,
+            bem: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="9" y1="12" x2="21" y2="12"/></svg>`,
+            base64: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`,
+            url: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
+            jwt: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="7" y1="15" x2="7.01" y2="15"/><line x1="12" y1="15" x2="13.01" y2="15"/></svg>`,
+            diff: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="3" x2="12" y2="21"/><path d="M5 12h4"/><path d="M15 12h4"/><path d="M17 10v4"/></svg>`,
+            uuid: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 1.5 1.5M15.5 7.5 14 6"/></svg>`,
+            html: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/><line x1="12" y1="4" x2="10" y2="20"/></svg>`,
+            epoch: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+            regex: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><path d="M8 11h6"/><path d="M11 8v6"/></svg>`,
+            color: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 14.7255 3.09032 17.1962 4.85857 19C5.35843 19.5 5.25302 20.3129 4.67323 20.612C3.86477 21.0292 3 21.4398 3 22H12Z"/><circle cx="7.5" cy="10.5" r="1.5"/><circle cx="11.5" cy="7.5" r="1.5"/><circle cx="16.5" cy="9.5" r="1.5"/><circle cx="15.5" cy="14.5" r="1.5"/></svg>`
+        },
         tools: [
-            { id: 'json',     icon: '{}', title: 'JSON Formatter',      description: 'Format, minify & validate JSON.' },
-            { id: 'case',     icon: 'Aa', title: 'Case Converter',       description: 'Convert text between camel, snake, kebab, Pascal, etc.' },
-            { id: 'constant', icon: '#',  title: 'Constant Gen',         description: 'Generate PHP consts, PHP enums, JS objects, TS enums.' },
-            { id: 'bem',      icon: '[]', title: 'BEM Generator',        description: 'Generate BEM CSS classes with HTML snippets.' },
-            { id: 'base64',   icon: '🔒', title: 'Base64 Tool',          description: 'Encode and decode Base64 strings.' },
-            { id: 'url',      icon: '🔗', title: 'URL Tool',             description: 'Encode and decode URL-safe strings.' },
-            { id: 'jwt',      icon: '🎫', title: 'JWT Decoder',          description: 'Decode and inspect JSON Web Tokens.' },
-            { id: 'diff',     icon: '📊', title: 'Diff Checker',         description: 'Compare text differences line-by-line.' },
-            { id: 'uuid',     icon: '🔑', title: 'UUID & Key Gen',       description: 'Generate UUID v4 & random password keys.' },
-            { id: 'html',     icon: '🌐', title: 'HTML Formatter',       description: 'Format or minify HTML/XML documents.' },
-            { id: 'epoch',    icon: '⏰', title: 'Epoch Converter',      description: 'Convert Unix timestamp to human datetime.' },
-            { id: 'regex',    icon: '🔍', title: 'Regex Tester',         description: 'Match patterns against test text.' },
-            { id: 'color',    icon: '🎨', title: 'Color Converter',      description: 'Convert HEX, RGB, HSL and preview colors.' },
+            { id: 'json',     title: 'JSON Formatter',      description: 'Format, minify & validate JSON.' },
+            { id: 'case',     title: 'Case Converter',       description: 'Convert text between camel, snake, kebab, Pascal, etc.' },
+            { id: 'constant', title: 'Constant Gen',         description: 'Generate PHP consts, PHP enums, JS objects, TS enums.' },
+            { id: 'bem',      title: 'BEM Generator',        description: 'Generate BEM CSS classes with HTML snippets.' },
+            { id: 'base64',   title: 'Base64 Tool',          description: 'Encode and decode Base64 strings.' },
+            { id: 'url',      title: 'URL Tool',             description: 'Encode and decode URL-safe strings.' },
+            { id: 'jwt',      title: 'JWT Decoder',          description: 'Decode and inspect JSON Web Tokens.' },
+            { id: 'diff',     title: 'Diff Checker',         description: 'Compare text differences line-by-line.' },
+            { id: 'uuid',     title: 'UUID & Key Gen',       description: 'Generate UUID v4 & random password keys.' },
+            { id: 'html',     title: 'HTML Formatter',       description: 'Format or minify HTML/XML documents.' },
+            { id: 'epoch',    title: 'Epoch Converter',      description: 'Convert Unix timestamp to human datetime.' },
+            { id: 'regex',    title: 'Regex Tester',         description: 'Match patterns against test text.' },
+            { id: 'color',    title: 'Color Converter',      description: 'Convert HEX, RGB, HSL and preview colors.' },
         ],
         activeTool: loadFromLocalStorage('dev-toolkit.active-tool', 'json'),
         dark: loadFromLocalStorage('dev-toolkit.theme', 'dark') !== 'light',
@@ -111,7 +126,9 @@ window.devToolkitApp = function devToolkitApp() {
         epochTool: {
             currentEpoch: Math.floor(Date.now() / 1000),
             epochInput: Math.floor(Date.now() / 1000),
-            epochOutput: '',
+            outputs: null,
+            error: false,
+            errorMessage: '',
             dateInput: new Date().toISOString().slice(0, 19),
             dateOutput: '',
         },
@@ -351,9 +368,12 @@ window.devToolkitApp = function devToolkitApp() {
         runEpochToDate() {
             try {
                 const result = epochToDate(this.epochTool.epochInput);
-                this.epochTool.epochOutput = `Format: ${result.custom}\nISO:    ${result.iso}\nUTC:    ${result.utc}\nLocal:  ${result.local}`;
+                this.epochTool.outputs = result;
+                this.epochTool.error = false;
             } catch (e) {
-                this.epochTool.epochOutput = e.message;
+                this.epochTool.outputs = null;
+                this.epochTool.error = true;
+                this.epochTool.errorMessage = e.message;
             }
         },
         runDateToEpoch() {
