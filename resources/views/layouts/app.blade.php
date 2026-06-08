@@ -37,8 +37,8 @@
     <!-- Structured Data -->
     <script type="application/ld+json">
     {
-      "@context": "https://schema.org",
-      "@type": "WebApplication",
+      "@@context": "https://schema.org",
+      "@@type": "WebApplication",
       "name": "Dev Toolkit",
       "url": "https://toolkit.minhnv.work",
       "description": "All-in-one developer utilities: Format JSON/HTML, compare diffs, convert Base64/URL/JWT/Epoch, test Regex, generate UUIDs, convert colors.",
