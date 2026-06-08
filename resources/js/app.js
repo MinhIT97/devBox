@@ -58,7 +58,10 @@ window.devToolkitApp = function devToolkitApp() {
             { id: 'regex',    title: 'Regex Tester',         description: 'Match patterns against test text.' },
             { id: 'color',    title: 'Color Converter',      description: 'Convert HEX, RGB, HSL and preview colors.' },
         ],
-        activeTool: loadFromLocalStorage('dev-toolkit.active-tool', 'json'),
+        activeTool: loadFromLocalStorage('dev-toolkit.active-tool', null),
+        toolSearch: '',
+        filteredFormatterTools: [],
+        filteredConverterTools: [],
         dark: loadFromLocalStorage('dev-toolkit.theme', 'dark') !== 'light',
         toast: '',
         toastTimer: null,
@@ -151,8 +154,11 @@ window.devToolkitApp = function devToolkitApp() {
 
         init() {
             document.documentElement.classList.toggle('dark', this.dark);
-            
-            // Initial executions
+
+            // Initialize tool filters
+            this.filterTools();
+
+            // Initial executions for all tools
             this.convertCase();
             this.generateConstant();
             this.generateBem();
@@ -161,7 +167,7 @@ window.devToolkitApp = function devToolkitApp() {
             this.runColor();
             this.runEpochToDate();
             this.runDateToEpoch();
-            
+
             // Set live epoch timer
             setInterval(() => {
                 this.epochTool.currentEpoch = Math.floor(Date.now() / 1000);
@@ -169,12 +175,105 @@ window.devToolkitApp = function devToolkitApp() {
         },
 
         currentTool() {
-            return this.tools.find((tool) => tool.id === this.activeTool) ?? this.tools[0];
+            return this.tools.find((tool) => tool.id === this.activeTool) ?? null;
         },
 
         selectTool(toolId) {
             this.activeTool = toolId;
-            saveToLocalStorage('dev-toolkit.active-tool', toolId);
+            this.toolSearch = '';
+            this.filterTools();
+            saveToLocalStorage('dev-toolkit.active-tool', toolId || '');
+        },
+
+        // Tool search & filter
+        filterTools() {
+            const query = (this.toolSearch || '').toLowerCase().trim();
+            const formatterIds = ['json', 'html', 'diff', 'case', 'constant', 'bem'];
+            const converterIds = ['base64', 'url', 'jwt', 'uuid', 'epoch', 'regex', 'color'];
+
+            const match = (tool) => {
+                if (!query) return true;
+                return tool.title.toLowerCase().includes(query) ||
+                       tool.description.toLowerCase().includes(query) ||
+                       tool.id.toLowerCase().includes(query);
+            };
+
+            this.filteredFormatterTools = this.tools.filter(t => formatterIds.includes(t.id) && match(t));
+            this.filteredConverterTools = this.tools.filter(t => converterIds.includes(t.id) && match(t));
+        },
+
+        // Keyboard shortcuts
+        getKeyboardHints() {
+            const tool = this.currentTool();
+            if (!tool) return '';
+            const hints = {
+                json: '<span class="kbd">Ctrl</span>+<span class="kbd">Enter</span> Format',
+                case: '<span class="kbd">Ctrl</span>+<span class="kbd">Enter</span> Convert',
+                constant: '<span class="kbd">Ctrl</span>+<span class="kbd">Enter</span> Generate',
+                bem: '<span class="kbd">Ctrl</span>+<span class="kbd">Enter</span> Generate',
+                base64: '<span class="kbd">Ctrl</span>+<span class="kbd">Enter</span> Encode',
+                url: '<span class="kbd">Ctrl</span>+<span class="kbd">Enter</span> Encode',
+                jwt: '<span class="kbd">Ctrl</span>+<span class="kbd">Enter</span> Decode',
+                diff: '<span class="kbd">Ctrl</span>+<span class="kbd">Enter</span> Compare',
+                uuid: '<span class="kbd">Ctrl</span>+<span class="kbd">Enter</span> Generate UUIDs',
+                html: '<span class="kbd">Ctrl</span>+<span class="kbd">Enter</span> Format',
+                epoch: '',
+                regex: '<span class="kbd">Ctrl</span>+<span class="kbd">Enter</span> Test Match',
+                color: '',
+            };
+            return hints[tool.id] || '';
+        },
+
+        handleGlobalKeydown(e) {
+            // Ctrl+K or / — focus search
+            if ((e.ctrlKey && e.key === 'k') || (e.key === '/' && !this.isInputFocused())) {
+                e.preventDefault();
+                this.$refs.toolSearchInput.focus();
+                return;
+            }
+
+            // Escape — clear active tool (go to welcome)
+            if (e.key === 'Escape' && !this.isInputFocused() && this.activeTool) {
+                e.preventDefault();
+                this.activeTool = null;
+                saveToLocalStorage('dev-toolkit.active-tool', '');
+                return;
+            }
+
+            // Ctrl+Enter — trigger primary action
+            if (e.ctrlKey && e.key === 'Enter' && this.activeTool && !this.isInputFocused()) {
+                e.preventDefault();
+                this.triggerPrimaryAction();
+                return;
+            }
+        },
+
+        isInputFocused() {
+            const el = document.activeElement;
+            return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable);
+        },
+
+        triggerPrimaryAction() {
+            const actions = {
+                json: () => this.formatJson(),
+                case: () => this.convertCase(),
+                constant: () => this.generateConstant(),
+                bem: () => this.generateBem(),
+                base64: () => this.runBase64Encode(),
+                url: () => this.runUrlEncode(),
+                jwt: () => this.runJwtDecode(),
+                diff: () => this.runDiff(),
+                uuid: () => this.generateUuids(),
+                html: () => this.runHtmlFormat(),
+                epoch: () => {},
+                regex: () => this.runRegex(),
+                color: () => {},
+            };
+            const action = actions[this.activeTool];
+            if (action) {
+                action();
+                this.showToast('Action triggered!');
+            }
         },
 
         toggleTheme() {

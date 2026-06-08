@@ -3,7 +3,7 @@
 @section('title', 'Dev Toolkit — Daily utilities for developers')
 
 @section('content')
-<div x-data="devToolkitApp()" x-init="init()" :class="{ 'light': !dark }" class="app-wrapper">
+<div x-data="devToolkitApp()" x-init="init()" :class="{ 'light': !dark }" class="app-wrapper" @keydown.window="handleGlobalKeydown($event)">
 
     {{-- Ambient orbs --}}
     <div class="orb orb-1"></div>
@@ -51,13 +51,30 @@
             </button>
         </div>
 
+        {{-- Tool Search --}}
+        <div class="sidebar-search">
+            <svg class="sidebar-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input
+                type="text"
+                class="sidebar-search-input"
+                x-model="toolSearch"
+                x-ref="toolSearchInput"
+                @input="filterTools()"
+                placeholder="Search tools..."
+                aria-label="Search tools"
+            >
+            <span class="sidebar-search-shortcut" x-show="!toolSearch">/</span>
+        </div>
+
         {{-- Group: Formatters --}}
-        <span class="nav-section-label">Formatters</span>
+        <template x-if="filteredFormatterTools.length > 0">
+            <span class="nav-section-label">Formatters</span>
+        </template>
         <nav class="sidebar-nav" aria-label="Formatter tools">
-            @php
-            $formatters = ['json','html','diff','case','constant','bem'];
-            @endphp
-            <template x-for="tool in tools.filter(t => ['json','html','diff','case','constant','bem'].includes(t.id))" :key="tool.id">
+            <template x-for="tool in filteredFormatterTools" :key="tool.id">
                 <button
                     type="button"
                     class="tool-nav"
@@ -76,9 +93,11 @@
         </nav>
 
         {{-- Group: Converters & Generators --}}
-        <span class="nav-section-label">Converters & Generators</span>
+        <template x-if="filteredConverterTools.length > 0">
+            <span class="nav-section-label">Converters & Generators</span>
+        </template>
         <nav class="sidebar-nav" aria-label="Converter tools">
-            <template x-for="tool in tools.filter(t => ['base64','url','jwt','uuid','epoch','regex','color'].includes(t.id))" :key="tool.id">
+            <template x-for="tool in filteredConverterTools" :key="tool.id">
                 <button
                     type="button"
                     class="tool-nav"
@@ -96,6 +115,12 @@
             </template>
         </nav>
 
+        {{-- No results --}}
+        <div class="no-results" x-show="toolSearch && filteredFormatterTools.length === 0 && filteredConverterTools.length === 0">
+            <p>No tools match "<strong x-text="toolSearch"></strong>"</p>
+            <p style="font-size:11px; margin-top:4px">Try a different keyword.</p>
+        </div>
+
         {{-- Footer --}}
         <div class="sidebar-footer">
             <svg class="footer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -103,43 +128,135 @@
                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
             </svg>
             <span>Dev Toolkit</span>
-            <span class="sidebar-footer-badge">v1.1</span>
+            <span class="sidebar-footer-badge">v1.2</span>
         </div>
     </aside>
 
-    {{-- ══ MAIN ══ --}}
+    {{-- ══ MAIN CONTENT ══ --}}
     <main class="main-content">
         <div style="max-width:1200px; margin:0 auto">
 
-            {{-- Page header --}}
-            <header class="page-header">
-                <div>
-                    <h1 class="page-title" x-text="currentTool().title"></h1>
-                    <p class="page-desc" x-text="currentTool().description"></p>
-                </div>
-
-                {{-- Toast --}}
-                <div
-                    x-show="toast"
-                    x-transition:enter="transition ease-out duration-200"
-                    x-transition:enter-start="opacity-0 translate-y-1"
-                    x-transition:enter-end="opacity-100 translate-y-0"
-                    x-transition:leave="transition ease-in duration-150"
-                    x-transition:leave-start="opacity-100"
-                    x-transition:leave-end="opacity-0"
-                    class="toast"
-                    role="status"
-                    aria-live="polite"
-                >
-                    <svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="20 6 9 17 4 12"></polyline>
+            {{-- ══ WELCOME HERO ══ --}}
+            <div x-show="!activeTool" x-cloak class="welcome-hero">
+                <div class="welcome-hero-icon">
+                    <svg class="welcome-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
                     </svg>
-                    <span x-text="toast"></span>
                 </div>
-            </header>
+                <h2>All-in-one Developer Toolkit</h2>
+                <p>13 powerful utilities to speed up your daily workflow. Format JSON, convert cases, generate constants, decode JWTs, test regex, and more — all from your browser.</p>
+                <div class="welcome-quick-actions">
+                    <button class="welcome-quick-chip" @click="selectTool('json')">
+                        <span x-html="icons.json" style="display:inline-flex; align-items:center"></span>
+                        JSON Formatter
+                    </button>
+                    <button class="welcome-quick-chip" @click="selectTool('base64')">
+                        <span x-html="icons.base64" style="display:inline-flex; align-items:center"></span>
+                        Base64 Tool
+                    </button>
+                    <button class="welcome-quick-chip" @click="selectTool('uuid')">
+                        <span x-html="icons.uuid" style="display:inline-flex; align-items:center"></span>
+                        UUID Generator
+                    </button>
+                    <button class="welcome-quick-chip" @click="selectTool('diff')">
+                        <span x-html="icons.diff" style="display:inline-flex; align-items:center"></span>
+                        Diff Checker
+                    </button>
+                    <button class="welcome-quick-chip" @click="selectTool('regex')">
+                        <span x-html="icons.regex" style="display:inline-flex; align-items:center"></span>
+                        Regex Tester
+                    </button>
+                    <button class="welcome-quick-chip" @click="selectTool('color')">
+                        <span x-html="icons.color" style="display:inline-flex; align-items:center"></span>
+                        Color Converter
+                    </button>
+                </div>
+                <div class="kbd-hint" style="margin-top:24px">
+                    <span class="kbd">/</span> Search tools &nbsp;&middot;&nbsp;
+                    <span class="kbd">Ctrl</span>+<span class="kbd">K</span> Command palette &nbsp;&middot;&nbsp;
+                    <span class="kbd">Esc</span> Clear tool
+                </div>
+            </div>
+
+            {{-- ══ TOOL HEADER ══ --}}
+            <template x-if="activeTool">
+                <header class="page-header">
+                    <div class="page-header-left">
+                        <div class="page-header-tool-icon">
+                            <svg class="tool-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <template x-if="activeTool === 'json'">
+                                    <path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1M16 21h1a2 2 0 0 0 2-2v-5a2 2 0 0 1 2-2 2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"></path>
+                                </template>
+                                <template x-if="activeTool === 'case'">
+                                    <path d="m3 16 4-10 4 10M4.5 12h5M15 16V9a3 3 0 0 1 6 0v7M21 12h-6"></path>
+                                </template>
+                                <template x-if="activeTool === 'constant'">
+                                    <g><line x1="4" y1="9" x2="20" y2="9"></line><line x1="4" y1="15" x2="20" y2="15"></line><line x1="10" y1="3" x2="8" y2="21"></line><line x1="16" y1="3" x2="14" y2="21"></line></g>
+                                </template>
+                                <template x-if="activeTool === 'bem'">
+                                    <g><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line><line x1="9" y1="12" x2="21" y2="12"></line></g>
+                                </template>
+                                <template x-if="activeTool === 'base64'">
+                                    <g><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></g>
+                                </template>
+                                <template x-if="activeTool === 'url'">
+                                    <g><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></g>
+                                </template>
+                                <template x-if="activeTool === 'jwt'">
+                                    <g><rect x="3" y="5" width="18" height="14" rx="2"></rect><line x1="3" y1="10" x2="21" y2="10"></line><line x1="7" y1="15" x2="7.01" y2="15"></line><line x1="12" y1="15" x2="13.01" y2="15"></line></g>
+                                </template>
+                                <template x-if="activeTool === 'diff'">
+                                    <g><line x1="12" y1="3" x2="12" y2="21"></line><path d="M5 12h4"></path><path d="M15 12h4"></path><path d="M17 10v4"></path></g>
+                                </template>
+                                <template x-if="activeTool === 'uuid'">
+                                    <g><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 1.5 1.5M15.5 7.5 14 6"></path></g>
+                                </template>
+                                <template x-if="activeTool === 'html'">
+                                    <g><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline><line x1="12" y1="4" x2="10" y2="20"></line></g>
+                                </template>
+                                <template x-if="activeTool === 'epoch'">
+                                    <g><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></g>
+                                </template>
+                                <template x-if="activeTool === 'regex'">
+                                    <g><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><path d="M8 11h6"></path><path d="M11 8v6"></path></g>
+                                </template>
+                                <template x-if="activeTool === 'color'">
+                                    <g><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 14.7255 3.09032 17.1962 4.85857 19C5.35843 19.5 5.25302 20.3129 4.67323 20.612C3.86477 21.0292 3 21.4398 3 22H12Z"></path><circle cx="7.5" cy="10.5" r="1.5"></circle><circle cx="11.5" cy="7.5" r="1.5"></circle><circle cx="16.5" cy="9.5" r="1.5"></circle><circle cx="15.5" cy="14.5" r="1.5"></circle></g>
+                                </template>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="page-title" x-text="currentTool().title"></h1>
+                            <p class="page-desc" x-text="currentTool().description"></p>
+                            <div class="kbd-hint" x-html="getKeyboardHints()"></div>
+                        </div>
+                    </div>
+
+                    {{-- Toast --}}
+                    <div
+                        x-show="toast"
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0 translate-y-1"
+                        x-transition:enter-end="opacity-100 translate-y-0"
+                        x-transition:leave="transition ease-in duration-150"
+                        x-transition:leave-start="opacity-100"
+                        x-transition:leave-end="opacity-0"
+                        class="toast"
+                        role="status"
+                        aria-live="polite"
+                    >
+                        <svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span x-text="toast"></span>
+                    </div>
+                </header>
+            </template>
+
+            {{-- ══ TOOL SECTIONS ══ --}}
 
             {{-- ── JSON Formatter ── --}}
-            <section x-show="activeTool === 'json'" x-cloak>
+            <section x-show="activeTool === 'json'" x-cloak class="tool-section-enter">
                 <div class="toolbar">
                     <button id="json-format-btn"   type="button" class="btn-primary" @click="formatJson()">Format</button>
                     <button id="json-minify-btn"   type="button" class="btn"         @click="minifyJson()">Minify</button>
@@ -182,7 +299,7 @@
             </section>
 
             {{-- ── Case Converter ── --}}
-            <section x-show="activeTool === 'case'" x-cloak>
+            <section x-show="activeTool === 'case'" x-cloak class="tool-section-enter">
                 <div class="toolbar">
                     <button id="case-convert-btn" type="button" class="btn-primary" @click="convertCase()">Convert</button>
                     <button id="case-copy-btn"    type="button" class="btn"         @click="copyCaseOutput()">Copy Output</button>
@@ -215,7 +332,7 @@
             </section>
 
             {{-- ── Constant Generator ── --}}
-            <section x-show="activeTool === 'constant'" x-cloak>
+            <section x-show="activeTool === 'constant'" x-cloak class="tool-section-enter">
                 <div class="toolbar">
                     <button id="const-generate-btn" type="button" class="btn-primary" @click="generateConstant()">Generate</button>
                     <select id="const-mode-select" class="select-shell" x-model="constantTool.mode" @change="saveConstantMode(); generateConstant()">
@@ -255,7 +372,7 @@
             </section>
 
             {{-- ── BEM Generator ── --}}
-            <section x-show="activeTool === 'bem'" x-cloak>
+            <section x-show="activeTool === 'bem'" x-cloak class="tool-section-enter">
                 <div class="toolbar">
                     <button id="bem-generate-btn" type="button" class="btn-primary" @click="generateBem()">Generate</button>
                     <button id="bem-copy-btn"     type="button" class="btn"        @click="copyBemOutput()">Copy Output</button>
@@ -265,15 +382,15 @@
                 <div style="display:grid; gap:16px; grid-template-columns: minmax(0,0.75fr) minmax(0,1.25fr)">
                     <div class="tool-panel">
                         <div style="display:flex; flex-direction:column; gap:16px">
-                            <label class="block" style="display:block">
+                            <label style="display:block">
                                 <span class="field-label">Block</span>
                                 <input id="bem-block" class="input-shell" x-model="bemTool.block" @input="persistBemInput()" placeholder="product-card">
                             </label>
-                            <label class="block" style="display:block">
+                            <label style="display:block">
                                 <span class="field-label">Element</span>
                                 <input id="bem-element" class="input-shell" x-model="bemTool.element" @input="persistBemInput()" placeholder="title">
                             </label>
-                            <label class="block" style="display:block">
+                            <label style="display:block">
                                 <span class="field-label">Modifier</span>
                                 <input id="bem-modifier" class="input-shell" x-model="bemTool.modifier" @input="persistBemInput()" placeholder="active">
                             </label>
@@ -295,7 +412,7 @@
             </section>
 
             {{-- ── Base64 Tool ── --}}
-            <section x-show="activeTool === 'base64'" x-cloak>
+            <section x-show="activeTool === 'base64'" x-cloak class="tool-section-enter">
                 <div class="toolbar">
                     <button id="base64-encode-btn" type="button" class="btn-primary" @click="runBase64Encode()">Encode</button>
                     <button id="base64-decode-btn" type="button" class="btn"         @click="runBase64Decode()">Decode</button>
@@ -336,7 +453,7 @@
             </section>
 
             {{-- ── URL Tool ── --}}
-            <section x-show="activeTool === 'url'" x-cloak>
+            <section x-show="activeTool === 'url'" x-cloak class="tool-section-enter">
                 <div class="toolbar">
                     <button id="url-encode-btn" type="button" class="btn-primary" @click="runUrlEncode()">Encode</button>
                     <button id="url-decode-btn" type="button" class="btn"         @click="runUrlDecode()">Decode</button>
@@ -377,7 +494,7 @@
             </section>
 
             {{-- ── JWT Decoder ── --}}
-            <section x-show="activeTool === 'jwt'" x-cloak>
+            <section x-show="activeTool === 'jwt'" x-cloak class="tool-section-enter">
                 <div class="toolbar">
                     <button id="jwt-decode-btn" type="button" class="btn-primary" @click="runJwtDecode()">Decode</button>
                     <button id="jwt-copy-header-btn"  type="button" class="btn" @click="copy(jwtTool.header)">Copy Header</button>
@@ -432,7 +549,7 @@
             </section>
 
             {{-- ── Diff Checker ── --}}
-            <section x-show="activeTool === 'diff'" x-cloak>
+            <section x-show="activeTool === 'diff'" x-cloak class="tool-section-enter">
                 <div class="toolbar">
                     <button id="diff-compare-btn" type="button" class="btn-primary" @click="runDiff()">Compare</button>
                     <button id="diff-clear-btn"   type="button" class="btn-danger"  @click="clearInput('diff')">Clear</button>
@@ -478,7 +595,7 @@
             </section>
 
             {{-- ── UUID & Key Gen ── --}}
-            <section x-show="activeTool === 'uuid'" x-cloak>
+            <section x-show="activeTool === 'uuid'" x-cloak class="tool-section-enter">
                 <div style="display:grid; gap:16px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr))">
                     <div class="tool-panel">
                         <label class="field-label">UUID v4 Generator</label>
@@ -529,7 +646,7 @@
             </section>
 
             {{-- ── HTML Formatter ── --}}
-            <section x-show="activeTool === 'html'" x-cloak>
+            <section x-show="activeTool === 'html'" x-cloak class="tool-section-enter">
                 <div class="toolbar">
                     <button id="html-format-btn" type="button" class="btn-primary" @click="runHtmlFormat()">Format</button>
                     <button id="html-minify-btn" type="button" class="btn"         @click="runHtmlMinify()">Minify</button>
@@ -570,11 +687,11 @@
             </section>
 
             {{-- ── Epoch Converter ── --}}
-            <section x-show="activeTool === 'epoch'" x-cloak>
-                <div class="tool-panel" style="margin-bottom:16px; display:flex; align-items:center; justify-content:space-between">
+            <section x-show="activeTool === 'epoch'" x-cloak class="tool-section-enter">
+                <div class="tool-panel tool-panel-accent" style="margin-bottom:16px; display:flex; align-items:center; justify-content:space-between">
                     <div>
                         <span class="field-label" style="margin:0">Current Unix Timestamp Clock</span>
-                        <div style="font-family:var(--font-mono); font-size:24px; font-weight:700; color:var(--accent); margin-top:4px" x-text="epochTool.currentEpoch"></div>
+                        <div style="font-family:var(--font-mono); font-size:28px; font-weight:700; color:var(--accent); margin-top:4px; letter-spacing:-0.5px" x-text="epochTool.currentEpoch"></div>
                     </div>
                     <button type="button" class="btn" @click="copy(epochTool.currentEpoch)">Copy Current Epoch</button>
                 </div>
@@ -632,7 +749,7 @@
                                 <button type="button" class="btn-primary" @click="epochTool.dateInput = new Date().toISOString().slice(0, 19); runDateToEpoch()">Now</button>
                             </div>
                             <span class="field-label">Epoch Output</span>
-                            <div style="font-family:var(--font-mono); font-size:20px; font-weight:700; padding:12px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface-2)" x-text="epochTool.dateOutput"></div>
+                            <div style="font-family:var(--font-mono); font-size:22px; font-weight:700; padding:14px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface-2); letter-spacing:-0.3px" x-text="epochTool.dateOutput"></div>
                         </div>
                         <button type="button" class="btn" style="margin-top:12px; width:100%" @click="copy(epochTool.dateOutput)">Copy Epoch</button>
                     </div>
@@ -640,7 +757,7 @@
             </section>
 
             {{-- ── Regex Tester ── --}}
-            <section x-show="activeTool === 'regex'" x-cloak>
+            <section x-show="activeTool === 'regex'" x-cloak class="tool-section-enter">
                 <div class="toolbar">
                     <button id="regex-test-btn" type="button" class="btn-primary" @click="runRegex()">Test Match</button>
                     <button id="regex-clear-btn" type="button" class="btn-danger"  @click="clearInput('regex')">Clear Text</button>
@@ -703,7 +820,7 @@
             </section>
 
             {{-- ── Color Converter ── --}}
-            <section x-show="activeTool === 'color'" x-cloak>
+            <section x-show="activeTool === 'color'" x-cloak class="tool-section-enter">
                 <div class="tool-panel" style="display:grid; gap:16px; grid-template-columns: 1fr 160px; margin-bottom:16px">
                     <div>
                         <label class="field-label" for="color-input">Color Input (HEX / RGB / HSL)</label>
