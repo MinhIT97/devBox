@@ -187,6 +187,16 @@
                             <h1 class="page-title" x-text="currentTool() ? currentTool().title : ''"></h1>
                             <p class="page-desc" x-text="currentTool() ? currentTool().description : ''"></p>
                             <div class="kbd-hint" x-text="getKeyboardHints()"></div>
+                            <div class="kbd-hint" style="margin-top:4px" x-show="currentToolInfo() && !showToolInfo">
+                                <button type="button" class="tool-info-reveal" @click="showToolInfo = true">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                    </svg>
+                                    Show tips
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -209,6 +219,50 @@
                         <span x-text="toast"></span>
                     </div>
                 </header>
+            </template>
+
+            {{-- ══ TOOL INFO BANNER ══ --}}
+            <template x-if="activeTool && currentToolInfo()">
+                <div
+                    class="tool-info-banner"
+                    x-show="showToolInfo"
+                    x-transition:enter="transition ease-out duration-250"
+                    x-transition:enter-start="opacity-0 transform scale-95"
+                    x-transition:enter-end="opacity-100 transform scale-100"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"
+                >
+                    <div class="tool-info-inner">
+                        <div class="tool-info-header">
+                            <div class="tool-info-header-left">
+                                <svg class="tool-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                </svg>
+                                <span class="tool-info-title">About <span x-text="currentTool() ? currentTool().title : ''"></span></span>
+                            </div>
+                            <button type="button" class="tool-info-close" @click="showToolInfo = false" title="Dismiss" aria-label="Dismiss info">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="tool-info-body">
+                            <p class="tool-info-what">
+                                <span class="tool-info-label">What is it?</span>
+                                <span x-html="currentToolInfo() ? currentToolInfo().what : ''"></span>
+                            </p>
+                            <div class="tool-info-divider"></div>
+                            <p class="tool-info-tip">
+                                <span class="tool-info-label">Pro tip</span>
+                                <span x-html="currentToolInfo() ? currentToolInfo().tip : ''"></span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </template>
 
             {{-- ── JSON Formatter ── --}}

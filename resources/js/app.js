@@ -77,6 +77,61 @@ window.devToolkitApp = function devToolkitApp() {
             regex: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><path d="M8 11h6"/><path d="M11 8v6"/></svg>`,
             color: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 14.7255 3.09032 17.1962 4.85857 19C5.35843 19.5 5.25302 20.3129 4.67323 20.612C3.86477 21.0292 3 21.4398 3 22H12Z"/><circle cx="7.5" cy="10.5" r="1.5"/><circle cx="11.5" cy="7.5" r="1.5"/><circle cx="16.5" cy="9.5" r="1.5"/><circle cx="15.5" cy="14.5" r="1.5"/></svg>`,
         },
+        toolInfoTips: {
+            json: {
+                what: 'JSON (JavaScript Object Notation) is the universal data format for APIs, configs, and data exchange.',
+                tip: 'Use <strong>Format</strong> to pretty-print minified JSON responses. <strong>Validate</strong> catches trailing commas, unquoted keys, and other common syntax errors before they cause bugs.',
+            },
+            case: {
+                what: 'Naming conventions keep your codebase consistent. Different languages and frameworks prefer different styles.',
+                tip: 'JavaScript/TypeScript uses <strong>camelCase</strong>, Python uses <strong>snake_case</strong>, CSS uses <strong>kebab-case</strong>, and constants are <strong>UPPER_SNAKE</strong>. Copy-paste between them instantly.',
+            },
+            constant: {
+                what: 'Turn a list of values into typed constants or enums — avoid magic strings scattered across your code.',
+                tip: 'Use <strong>PHP enum</strong> for Laravel backed enums with string values. <strong>TypeScript enum</strong> gives you compile-time safety in frontend projects.',
+            },
+            bem: {
+                what: '<strong>BEM</strong> (Block, Element, Modifier) is a CSS naming methodology that makes your stylesheets scalable and maintainable by organizing classes into reusable components.',
+                tip: '<strong>Block</strong> is the component root (<code>product-card</code>). <strong>Element</strong> is a child part (<code>product-card__title</code>). <strong>Modifier</strong> is a variant state (<code>product-card--active</code>). This tool auto-generates both the CSS selector and the matching HTML snippet.',
+            },
+            base64: {
+                what: 'Base64 encodes binary data into ASCII text — used everywhere from data URIs to API authentication headers.',
+                tip: 'Embed small images directly in CSS/HTML with <code>data:image/png;base64,...</code>. Encode credentials for <strong>Basic Auth</strong> headers. Remember: Base64 is <em>encoding</em>, not encryption.',
+            },
+            url: {
+                what: 'URL encoding (percent-encoding) makes strings safe for URLs by replacing special characters like spaces and ampersands.',
+                tip: 'Always <strong>encode</strong> query parameter values before appending them to URLs. <strong>Decode</strong> when reading <code>?redirect=</code> params or parsing webhook payloads.',
+            },
+            jwt: {
+                what: 'JSON Web Tokens carry signed claims between parties. The payload is Base64-encoded, not encrypted — anyone can read it.',
+                tip: 'Paste any JWT here to inspect its <strong>header</strong> (algorithm, type) and <strong>payload</strong> (user ID, roles, expiry). Never paste production tokens into untrusted tools — this one runs entirely in your browser.',
+            },
+            diff: {
+                what: 'A line-by-line text comparison tool. Green lines were added, red lines were removed, unchanged lines stay neutral.',
+                tip: 'Compare <strong>config files</strong> across environments, spot changes in <strong>error logs</strong> between deploys, or review <strong>code snippets</strong> without firing up a full git diff.',
+            },
+            uuid: {
+                what: 'UUID v4 generates random, globally-unique identifiers. The password generator creates cryptographically random strings for secrets and API keys.',
+                tip: 'UUIDs are perfect for <strong>database primary keys</strong> in distributed systems. For passwords, crank the length to <strong>32+ characters</strong> and enable all character sets for maximum entropy.',
+            },
+            html: {
+                what: 'Pretty-print or compress HTML/XML documents. Works with any XML-based markup like SVG, RSS feeds, or sitemaps.',
+                tip: 'Use <strong>Format</strong> to debug messy HTML output from WYSIWYG editors or template engines. <strong>Minify</strong> before pasting into email templates where whitespace matters.',
+            },
+            epoch: {
+                what: 'Unix timestamps count seconds since January 1, 1970 (UTC). The universal time format for APIs, databases, and logging systems.',
+                tip: 'Most systems use <strong>seconds</strong>, but JavaScript\'s <code>Date.now()</code> returns <strong>milliseconds</strong>. Divide by 1000 before using this tool. The live clock updates every second.',
+            },
+            regex: {
+                what: 'Regular expressions find, match, and extract text patterns — from email validation to log parsing to search-and-replace.',
+                tip: 'Use <strong>global (g)</strong> flag to find all matches, <strong>case-insensitive (i)</strong> for case-blind matching. Test your pattern here before shipping it to production validation logic.',
+            },
+            color: {
+                what: 'Convert colors between HEX, RGB, and HSL formats. Click the preview box to open a native color picker.',
+                tip: 'HEX is best for CSS. RGB/RGBA for dynamic transparency. HSL is the most human-readable — tweak <strong>Lightness</strong> for hover states and <strong>Saturation</strong> for muted variants. The picker syncs both ways.',
+            },
+        },
+        showToolInfo: true,
         dark: loadFromLocalStorage('dev-toolkit.theme', 'dark') !== 'light',
         toast: '',
         toastTimer: null,
@@ -191,6 +246,15 @@ window.devToolkitApp = function devToolkitApp() {
 
         currentTool() {
             return this.tools.find((tool) => tool.id === this.activeTool) ?? null;
+        },
+
+        currentToolInfo() {
+            if (!this.activeTool) return null;
+            return this.toolInfoTips[this.activeTool] ?? null;
+        },
+
+        toggleToolInfo() {
+            this.showToolInfo = !this.showToolInfo;
         },
 
         selectTool(toolId) {
