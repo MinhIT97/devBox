@@ -182,53 +182,11 @@
             <template x-if="activeTool">
                 <header class="page-header">
                     <div class="page-header-left">
-                        <div class="page-header-tool-icon">
-                            <svg class="tool-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <template x-if="activeTool === 'json'">
-                                    <path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1M16 21h1a2 2 0 0 0 2-2v-5a2 2 0 0 1 2-2 2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"></path>
-                                </template>
-                                <template x-if="activeTool === 'case'">
-                                    <path d="m3 16 4-10 4 10M4.5 12h5M15 16V9a3 3 0 0 1 6 0v7M21 12h-6"></path>
-                                </template>
-                                <template x-if="activeTool === 'constant'">
-                                    <g><line x1="4" y1="9" x2="20" y2="9"></line><line x1="4" y1="15" x2="20" y2="15"></line><line x1="10" y1="3" x2="8" y2="21"></line><line x1="16" y1="3" x2="14" y2="21"></line></g>
-                                </template>
-                                <template x-if="activeTool === 'bem'">
-                                    <g><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line><line x1="9" y1="12" x2="21" y2="12"></line></g>
-                                </template>
-                                <template x-if="activeTool === 'base64'">
-                                    <g><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></g>
-                                </template>
-                                <template x-if="activeTool === 'url'">
-                                    <g><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></g>
-                                </template>
-                                <template x-if="activeTool === 'jwt'">
-                                    <g><rect x="3" y="5" width="18" height="14" rx="2"></rect><line x1="3" y1="10" x2="21" y2="10"></line><line x1="7" y1="15" x2="7.01" y2="15"></line><line x1="12" y1="15" x2="13.01" y2="15"></line></g>
-                                </template>
-                                <template x-if="activeTool === 'diff'">
-                                    <g><line x1="12" y1="3" x2="12" y2="21"></line><path d="M5 12h4"></path><path d="M15 12h4"></path><path d="M17 10v4"></path></g>
-                                </template>
-                                <template x-if="activeTool === 'uuid'">
-                                    <g><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 1.5 1.5M15.5 7.5 14 6"></path></g>
-                                </template>
-                                <template x-if="activeTool === 'html'">
-                                    <g><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline><line x1="12" y1="4" x2="10" y2="20"></line></g>
-                                </template>
-                                <template x-if="activeTool === 'epoch'">
-                                    <g><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></g>
-                                </template>
-                                <template x-if="activeTool === 'regex'">
-                                    <g><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><path d="M8 11h6"></path><path d="M11 8v6"></path></g>
-                                </template>
-                                <template x-if="activeTool === 'color'">
-                                    <g><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 14.7255 3.09032 17.1962 4.85857 19C5.35843 19.5 5.25302 20.3129 4.67323 20.612C3.86477 21.0292 3 21.4398 3 22H12Z"></path><circle cx="7.5" cy="10.5" r="1.5"></circle><circle cx="11.5" cy="7.5" r="1.5"></circle><circle cx="16.5" cy="9.5" r="1.5"></circle><circle cx="15.5" cy="14.5" r="1.5"></circle></g>
-                                </template>
-                            </svg>
-                        </div>
+                        <div class="page-header-tool-icon" x-html="toolHeaderIcons[activeTool] || ''"></div>
                         <div>
-                            <h1 class="page-title" x-text="currentTool().title"></h1>
-                            <p class="page-desc" x-text="currentTool().description"></p>
-                            <div class="kbd-hint" x-html="getKeyboardHints()"></div>
+                            <h1 class="page-title" x-text="currentTool() ? currentTool().title : ''"></h1>
+                            <p class="page-desc" x-text="currentTool() ? currentTool().description : ''"></p>
+                            <div class="kbd-hint" x-text="getKeyboardHints()"></div>
                         </div>
                     </div>
 
@@ -252,8 +210,6 @@
                     </div>
                 </header>
             </template>
-
-            {{-- ══ TOOL SECTIONS ══ --}}
 
             {{-- ── JSON Formatter ── --}}
             <section x-show="activeTool === 'json'" x-cloak class="tool-section-enter">
