@@ -10,10 +10,64 @@
     <div class="orb orb-2"></div>
     <div class="orb orb-3"></div>
 
-    {{-- ══ SIDEBAR ══ --}}
-    <aside class="sidebar">
+    {{-- ══ MOBILE HEADER ══ --}}
+    <header class="mobile-header">
+        <div class="sidebar-logo">
+            <div class="sidebar-logo-icon">
+                <svg class="logo-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+            </div>
+            <span class="sidebar-title">Dev Toolkit</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px">
+            {{-- Theme toggle mobile --}}
+            <button
+                type="button"
+                class="theme-btn-mobile"
+                @click="toggleTheme()"
+                aria-label="Toggle theme"
+            >
+                <svg x-show="dark" class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <svg x-show="!dark" class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+            </button>
+            {{-- Hamburger menu --}}
+            <button
+                type="button"
+                class="menu-toggle-btn"
+                @click="showMobileMenu = !showMobileMenu"
+                :aria-expanded="showMobileMenu"
+                aria-label="Toggle menu"
+            >
+                <svg x-show="!showMobileMenu" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+                <svg x-show="showMobileMenu" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+    </header>
 
-        {{-- Logo + Header --}}
+    {{-- ══ SIDEBAR ══ --}}
+    <aside class="sidebar" :class="{ 'sidebar-open': showMobileMenu }">
+
+        {{-- Logo + Header (Desktop Only) --}}
         <div class="sidebar-header">
             <div class="sidebar-logo">
                 <div class="sidebar-logo-icon">
@@ -69,56 +123,58 @@
             <span class="sidebar-search-shortcut" x-show="!toolSearch">/</span>
         </div>
 
-        {{-- Group: Formatters --}}
-        <template x-if="filteredFormatterTools.length > 0">
-            <span class="nav-section-label">Formatters</span>
-        </template>
-        <nav class="sidebar-nav" aria-label="Formatter tools">
-            <template x-for="tool in filteredFormatterTools" :key="tool.id">
-                <button
-                    type="button"
-                    class="tool-nav"
-                    :class="{ 'tool-nav-active': activeTool === tool.id }"
-                    @click="selectTool(tool.id)"
-                    :id="'nav-' + tool.id"
-                    :aria-current="activeTool === tool.id ? 'page' : null"
-                >
-                    <span class="nav-title">
-                        <span x-html="icons[tool.id]" style="display:inline-flex; align-items:center"></span>
-                        <span x-text="tool.title"></span>
-                    </span>
-                    <span class="nav-desc" x-text="tool.description"></span>
-                </button>
+        <div class="sidebar-body">
+            {{-- Group: Formatters --}}
+            <template x-if="filteredFormatterTools.length > 0">
+                <span class="nav-section-label">Formatters</span>
             </template>
-        </nav>
+            <nav class="sidebar-nav" aria-label="Formatter tools">
+                <template x-for="tool in filteredFormatterTools" :key="tool.id">
+                    <button
+                        type="button"
+                        class="tool-nav"
+                        :class="{ 'tool-nav-active': activeTool === tool.id }"
+                        @click="selectTool(tool.id)"
+                        :id="'nav-' + tool.id"
+                        :aria-current="activeTool === tool.id ? 'page' : null"
+                    >
+                        <span class="nav-title">
+                            <span x-html="icons[tool.id]" style="display:inline-flex; align-items:center"></span>
+                            <span x-text="tool.title"></span>
+                        </span>
+                        <span class="nav-desc" x-text="tool.description"></span>
+                    </button>
+                </template>
+            </nav>
 
-        {{-- Group: Converters & Generators --}}
-        <template x-if="filteredConverterTools.length > 0">
-            <span class="nav-section-label">Converters & Generators</span>
-        </template>
-        <nav class="sidebar-nav" aria-label="Converter tools">
-            <template x-for="tool in filteredConverterTools" :key="tool.id">
-                <button
-                    type="button"
-                    class="tool-nav"
-                    :class="{ 'tool-nav-active': activeTool === tool.id }"
-                    @click="selectTool(tool.id)"
-                    :id="'nav-' + tool.id"
-                    :aria-current="activeTool === tool.id ? 'page' : null"
-                >
-                    <span class="nav-title">
-                        <span x-html="icons[tool.id]" style="display:inline-flex; align-items:center"></span>
-                        <span x-text="tool.title"></span>
-                    </span>
-                    <span class="nav-desc" x-text="tool.description"></span>
-                </button>
+            {{-- Group: Converters & Generators --}}
+            <template x-if="filteredConverterTools.length > 0">
+                <span class="nav-section-label">Converters & Generators</span>
             </template>
-        </nav>
+            <nav class="sidebar-nav" aria-label="Converter tools">
+                <template x-for="tool in filteredConverterTools" :key="tool.id">
+                    <button
+                        type="button"
+                        class="tool-nav"
+                        :class="{ 'tool-nav-active': activeTool === tool.id }"
+                        @click="selectTool(tool.id)"
+                        :id="'nav-' + tool.id"
+                        :aria-current="activeTool === tool.id ? 'page' : null"
+                    >
+                        <span class="nav-title">
+                            <span x-html="icons[tool.id]" style="display:inline-flex; align-items:center"></span>
+                            <span x-text="tool.title"></span>
+                        </span>
+                        <span class="nav-desc" x-text="tool.description"></span>
+                    </button>
+                </template>
+            </nav>
 
-        {{-- No results --}}
-        <div class="no-results" x-show="toolSearch && filteredFormatterTools.length === 0 && filteredConverterTools.length === 0">
-            <p>No tools match "<strong x-text="toolSearch"></strong>"</p>
-            <p style="font-size:11px; margin-top:4px">Try a different keyword.</p>
+            {{-- No results --}}
+            <div class="no-results" x-show="toolSearch && filteredFormatterTools.length === 0 && filteredConverterTools.length === 0">
+                <p>No tools match "<strong x-text="toolSearch"></strong>"</p>
+                <p style="font-size:11px; margin-top:4px">Try a different keyword.</p>
+            </div>
         </div>
 
         {{-- Footer --}}
@@ -290,6 +346,51 @@
                     <button id="json-clear-btn"    type="button" class="btn-danger"  @click="clearInput('json'); resetShareUrl()">Clear</button>
                 </div>
 
+                {{-- Share Link Result — nằm trên, nổi bật --}}
+                <div
+                    x-show="jsonShare.url"
+                    x-transition:enter="transition ease-out duration-250"
+                    x-transition:enter-start="opacity-0 -translate-y-3"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    class="json-share-panel"
+                >
+                    <div class="json-share-inner">
+                        <div class="json-share-header">
+                            <div style="display:flex;align-items:center;gap:8px">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--success)"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                                <span style="font-size:13px;font-weight:700;color:var(--text-primary)">Link chia sẻ</span>
+                                <span class="json-share-badge">Hết hạn sau 24h</span>
+                            </div>
+                            <button type="button" class="json-share-close" @click="resetShareUrl()" title="Đóng">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            </button>
+                        </div>
+                        <div class="json-share-url-row">
+                            <code class="json-share-url" x-text="jsonShare.url" @click="copyShareUrl()" title="Click để copy"></code>
+                            <button type="button" class="btn-primary" style="min-height:34px;padding:0 14px;font-size:12px" @click="copyShareUrl()">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                                Copy
+                            </button>
+                        </div>
+                        <p class="json-share-auto-hint">Link đã được tự động copy vào clipboard</p>
+                    </div>
+                </div>
+
+                {{-- Share error --}}
+                <div
+                    x-show="jsonShare.error && !jsonShare.url"
+                    class="json-share-error"
+                >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span x-text="jsonShare.error"></span>
+                </div>
+
+                <p class="json-status"
+                   :class="json.error ? 'json-status-error' : 'json-status-ok'"
+                   x-text="json.message"
+                   style="margin-top:12px"
+                ></p>
+
                 <div style="display:grid; gap:16px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr))">
                     <div class="tool-panel">
                         <div style="display:flex; align-items:center; justify-content:space-between; gap:12px">
@@ -313,50 +414,6 @@
                             spellcheck="false"
                         ></textarea>
                     </div>
-                </div>
-
-                <p class="json-status"
-                   :class="json.error ? 'json-status-error' : 'json-status-ok'"
-                   x-text="json.message"
-                   style="margin-top:12px"
-                ></p>
-
-                {{-- Share Link Result --}}
-                <div
-                    x-show="jsonShare.url || jsonShare.error"
-                    x-transition:enter="transition ease-out duration-200"
-                    x-transition:enter-start="opacity-0 transform scale-98"
-                    x-transition:enter-end="opacity-100 transform scale-100"
-                    class="json-share-panel"
-                    style="margin-top:14px"
-                >
-                    <template x-if="jsonShare.url">
-                        <div class="json-share-inner">
-                            <div class="json-share-header">
-                                <div style="display:flex;align-items:center;gap:7px">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent)"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                                    <span style="font-size:12px;font-weight:600;color:var(--text-primary)">Link chia sẻ</span>
-                                    <span class="json-share-badge">⏱ Hết hạn sau 24h</span>
-                                </div>
-                                <button type="button" class="json-share-close" @click="resetShareUrl()" title="Đóng">
-                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                                </button>
-                            </div>
-                            <div class="json-share-url-row">
-                                <code class="json-share-url" x-text="jsonShare.url"></code>
-                                <button type="button" class="btn" style="min-height:32px;padding:0 12px;font-size:12px;white-space:nowrap" @click="copyShareUrl()">
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                                    Copy URL
-                                </button>
-                            </div>
-                        </div>
-                    </template>
-                    <template x-if="jsonShare.error && !jsonShare.url">
-                        <div style="padding:12px 16px;color:var(--error);font-size:13px;display:flex;align-items:center;gap:8px">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                            <span x-text="jsonShare.error"></span>
-                        </div>
-                    </template>
                 </div>
             </section>
 
@@ -958,6 +1015,218 @@
                    x-text="colorTool.message"
                    style="margin-top:12px"
                 ></p>
+            </section>
+
+            {{-- ── SQL Formatter ── --}}
+            <section x-show="activeTool === 'sql'" x-cloak class="tool-section-enter">
+                <div class="toolbar">
+                    <button id="sql-format-btn" type="button" class="btn-primary" @click="runSqlFormat()">Format</button>
+                    <button id="sql-minify-btn" type="button" class="btn"         @click="runSqlMinify()">Minify</button>
+                    <button id="sql-swap-btn"   type="button" class="btn"         @click="swapSql()">Swap</button>
+                    <button id="sql-copy-btn"   type="button" class="btn"         @click="copySqlOutput()">Copy Output</button>
+                    <button id="sql-clear-btn"  type="button" class="btn-danger"  @click="clearInput('sql')">Clear</button>
+                </div>
+                <div style="display:grid; gap:16px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr))">
+                    <div class="tool-panel">
+                        <label class="field-label" for="sql-input">Input SQL</label>
+                        <textarea id="sql-input" class="textarea-shell" x-model="sqlTool.input" @input="persistSqlInput()" spellcheck="false" placeholder="SELECT ... FROM ... WHERE ..."></textarea>
+                    </div>
+                    <div class="tool-panel">
+                        <label class="field-label" for="sql-output">Output</label>
+                        <textarea id="sql-output" class="textarea-shell" x-model="sqlTool.output" readonly spellcheck="false"></textarea>
+                    </div>
+                </div>
+                <p class="json-status" x-show="sqlTool.message" :class="sqlTool.error ? 'json-status-error' : 'json-status-ok'" x-text="sqlTool.message" style="margin-top:12px"></p>
+            </section>
+
+            {{-- ── IP / Geo Lookup ── --}}
+            <section x-show="activeTool === 'ip'" x-cloak class="tool-section-enter">
+                <div class="toolbar">
+                    <button id="ip-lookup-btn" type="button" class="btn-primary" @click="runIpLookup()" :disabled="ipTool.loading">
+                        <span x-show="!ipTool.loading">Lookup</span>
+                        <span x-show="ipTool.loading">Looking up...</span>
+                    </button>
+                    <button id="ip-myip-btn" type="button" class="btn" @click="ipTool.input=''; runIpLookup('')">My IP</button>
+                    <button id="ip-clear-btn"  type="button" class="btn-danger" @click="clearInput('ip')">Clear</button>
+                </div>
+                <div class="tool-panel" style="margin-bottom:16px">
+                    <label class="field-label" for="ip-input">IP Address (leave empty to detect yours)</label>
+                    <input id="ip-input" type="text" class="input-shell" x-model="ipTool.input" @keyup.enter="runIpLookup()" placeholder="8.8.8.8 or 2001:4860:4860::8888">
+                </div>
+                <template x-if="ipTool.result">
+                    <div class="tool-panel" style="margin-bottom:16px">
+                        <span class="field-label">Result</span>
+                        <div class="case-output-table">
+                            <template x-for="row in [
+                                {label:'IP', value:ipTool.result.ip},
+                                {label:'Country', value:ipTool.result.country + ' (' + ipTool.result.countryCode + ')'},
+                                {label:'City / Region', value:ipTool.result.city + ', ' + ipTool.result.region},
+                                {label:'ISP', value:ipTool.result.isp},
+                                {label:'Timezone', value:ipTool.result.timezone},
+                                {label:'Coordinates', value:ipTool.result.lat + ', ' + ipTool.result.lon},
+                                {label:'Postal Code', value:ipTool.result.postal || '-'}
+                            ]" :key="row.label">
+                                <div class="case-output-row">
+                                    <span class="case-label" x-text="row.label"></span>
+                                    <code class="case-value" x-text="row.value"></code>
+                                    <button type="button" class="case-copy-btn" @click="copy(row.value)" :title="'Copy ' + row.label">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+                <div x-show="ipTool.error" class="json-share-error" style="margin-top:12px" x-text="ipTool.error"></div>
+            </section>
+
+            {{-- ── Hash Generator ── --}}
+            <section x-show="activeTool === 'hash'" x-cloak class="tool-section-enter">
+                <div class="toolbar">
+                    <button id="hash-gen-btn"  type="button" class="btn-primary" @click="runHash()" :disabled="hashTool.loading">Generate</button>
+                    <button id="hash-clear-btn" type="button" class="btn-danger" @click="clearInput('hash')">Clear</button>
+                </div>
+                <div class="tool-panel" style="margin-bottom:16px">
+                    <label class="field-label" for="hash-input">Input text</label>
+                    <textarea id="hash-input" class="textarea-shell" style="min-height:100px" x-model="hashTool.input" @input="persistHashInput()" placeholder="Enter text to hash..."></textarea>
+                </div>
+                <template x-if="hashTool.results">
+                    <div class="tool-panel">
+                        <span class="field-label">Hash Results</span>
+                        <div class="case-output-table">
+                            <template x-for="row in [
+                                {label:'MD5', value:hashTool.results.md5},
+                                {label:'SHA-1', value:hashTool.results.sha1},
+                                {label:'SHA-256', value:hashTool.results.sha256},
+                                {label:'SHA-384', value:hashTool.results.sha384},
+                                {label:'SHA-512', value:hashTool.results.sha512}
+                            ]" :key="row.label">
+                                <div class="case-output-row">
+                                    <span class="case-label" x-text="row.label"></span>
+                                    <code class="case-value" x-text="row.value" style="font-size:10.5px"></code>
+                                    <button type="button" class="case-copy-btn" @click="copyHash(row.value)" :title="'Copy ' + row.label">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </section>
+
+            {{-- ── QR Code Generator ── --}}
+            <section x-show="activeTool === 'qrcode'" x-cloak class="tool-section-enter">
+                <div class="toolbar">
+                    <button id="qr-gen-btn"   type="button" class="btn-primary" @click="runQrCode()">Generate</button>
+                    <button id="qr-clear-btn" type="button" class="btn-danger"  @click="clearInput('qrcode')">Clear</button>
+                </div>
+                <div style="display:grid; gap:16px; grid-template-columns: 1fr auto">
+                    <div class="tool-panel">
+                        <label class="field-label" for="qr-input">Text or URL</label>
+                        <textarea id="qr-input" class="textarea-shell" style="min-height:120px" x-model="qrTool.input" @input="persistQrInput()" placeholder="https://example.com or any text..."></textarea>
+                        <div style="display:flex; align-items:center; gap:10px; margin-top:12px">
+                            <span style="font-size:11px; color:var(--text-muted)">Size:</span>
+                            <input type="range" x-model="qrTool.size" min="128" max="512" step="32" @input="runQrCode()" style="flex:1; accent-color:var(--accent)">
+                            <span style="font-size:11px; color:var(--text-muted); min-width:40px" x-text="qrTool.size + 'px'"></span>
+                        </div>
+                    </div>
+                    <div class="tool-panel" style="display:flex; align-items:center; justify-content:center; min-width:280px">
+                        <div style="text-align:center">
+                            <template x-if="qrTool.imageUrl">
+                                <div>
+                                    <img :src="qrTool.imageUrl" alt="QR Code" style="border-radius:var(--radius-md); display:block; max-width:280px" width="256" height="256">
+                                    <button type="button" class="btn" style="margin-top:12px; width:100%" @click="copy(qrTool.input)">Copy Text</button>
+                                </div>
+                            </template>
+                            <template x-if="!qrTool.imageUrl">
+                                <div style="color:var(--text-muted); font-size:13px; padding:40px 20px">Enter text or URL and click Generate to create a QR code</div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {{-- ── Lorem Ipsum Generator ── --}}
+            <section x-show="activeTool === 'lorem'" x-cloak class="tool-section-enter">
+                <div class="toolbar">
+                    <button id="lorem-gen-btn"  type="button" class="btn-primary" @click="generateLorem()">Generate</button>
+                    <select id="lorem-type" class="select-shell" x-model="loremTool.type">
+                        <option value="paragraphs">Paragraphs</option>
+                        <option value="sentences">Sentences</option>
+                        <option value="words">Words</option>
+                    </select>
+                    <input type="number" class="input-shell" style="max-width:80px" x-model="loremTool.count" min="1" max="100">
+                    <button id="lorem-copy-btn" type="button" class="btn"        @click="copyLorem()">Copy</button>
+                    <button id="lorem-clear-btn" type="button" class="btn-danger" @click="clearInput('lorem')">Clear</button>
+                </div>
+                <div class="tool-panel">
+                    <label class="field-label">Generated Text</label>
+                    <textarea class="textarea-shell" x-model="loremTool.output" readonly placeholder="Click Generate to create Lorem Ipsum text..."></textarea>
+                </div>
+            </section>
+
+            {{-- ── YAML ↔ JSON ── --}}
+            <section x-show="activeTool === 'yaml'" x-cloak class="tool-section-enter">
+                <div class="toolbar">
+                    <button id="yaml-to-json-btn" type="button" class="btn-primary" @click="runYamlToJson()">YAML → JSON</button>
+                    <button id="json-to-yaml-btn" type="button" class="btn"         @click="runJsonToYaml()">JSON → YAML</button>
+                    <button id="yaml-swap-btn"    type="button" class="btn"         @click="swapYamlJson()">Swap</button>
+                    <button id="yaml-clear-btn"   type="button" class="btn-danger"  @click="clearInput('yaml')">Clear</button>
+                </div>
+                <div style="display:grid; gap:16px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr))">
+                    <div class="tool-panel">
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px">
+                            <label class="field-label" for="yaml-input">YAML</label>
+                            <button type="button" class="btn" style="min-height:28px;padding:0 8px;font-size:11px" @click="copyYamlOutput()">Copy</button>
+                        </div>
+                        <textarea id="yaml-input" class="textarea-shell" x-model="yamlTool.yamlInput" @input="persistYamlInput()" spellcheck="false" placeholder="key: value"></textarea>
+                    </div>
+                    <div class="tool-panel">
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px">
+                            <label class="field-label" for="yaml-json-output">JSON</label>
+                            <button type="button" class="btn" style="min-height:28px;padding:0 8px;font-size:11px" @click="copyJsonFromYaml()">Copy</button>
+                        </div>
+                        <textarea id="yaml-json-output" class="textarea-shell" x-model="yamlTool.jsonInput" spellcheck="false" placeholder='{"key": "value"}'></textarea>
+                    </div>
+                </div>
+                <p class="json-status" x-show="yamlTool.message" :class="yamlTool.error ? 'json-status-error' : 'json-status-ok'" x-text="yamlTool.message" style="margin-top:12px"></p>
+            </section>
+
+            {{-- ── Certificate Decoder ── --}}
+            <section x-show="activeTool === 'cert'" x-cloak class="tool-section-enter">
+                <div class="toolbar">
+                    <button id="cert-decode-btn" type="button" class="btn-primary" @click="runCertDecode()">Decode</button>
+                    <button id="cert-clear-btn"  type="button" class="btn-danger"  @click="clearInput('cert')">Clear</button>
+                </div>
+                <div class="tool-panel" style="margin-bottom:16px">
+                    <label class="field-label" for="cert-input">PEM Certificate</label>
+                    <textarea id="cert-input" class="textarea-shell" style="min-height:200px; font-size:11px" x-model="certTool.input" placeholder="-----BEGIN CERTIFICATE-----&#10;...&#10;-----END CERTIFICATE-----" spellcheck="false"></textarea>
+                </div>
+                <div x-show="certTool.error" class="json-share-error" style="margin-top:12px" x-text="certTool.error"></div>
+                <template x-if="certTool.result">
+                    <div class="tool-panel">
+                        <span class="field-label">Certificate Details</span>
+                        <div class="case-output-table">
+                            <template x-for="row in [
+                                {label:'Subject', value:certTool.result.subject},
+                                {label:'Issuer', value:certTool.result.issuer},
+                                {label:'Valid From', value:certTool.result.validFrom},
+                                {label:'Valid To', value:certTool.result.validTo},
+                                {label:'Serial Number', value:certTool.result.serialNumber},
+                                {label:'SHA-1 Fingerprint', value:certTool.result.fingerprintSHA1 || 'Computing...'},
+                                {label:'SHA-256 Fingerprint', value:certTool.result.fingerprintSHA256 || 'Computing...'}
+                            ]" :key="row.label">
+                                <div class="case-output-row">
+                                    <span class="case-label" x-text="row.label"></span>
+                                    <code class="case-value" x-text="row.value" :style="row.label.includes('Fingerprint') ? 'font-size:9.5px' : ''"></code>
+                                    <button type="button" class="case-copy-btn" @click="copy(row.value)" :title="'Copy ' + row.label">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
             </section>
 
         </div>

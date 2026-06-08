@@ -24,6 +24,15 @@ import {
     dateToEpoch,
     testRegex,
     parseColor,
+    formatSql,
+    minifySql,
+    lookupIp,
+    generateAllHashes,
+    generateQrCode,
+    generateLorem,
+    yamlToJson,
+    jsonToYaml,
+    decodeCertificate,
 } from './tools/additionalTools';
 
 window.devToolkitApp = function devToolkitApp() {
@@ -41,7 +50,14 @@ window.devToolkitApp = function devToolkitApp() {
             html: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/><line x1="12" y1="4" x2="10" y2="20"/></svg>`,
             epoch: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
             regex: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><path d="M8 11h6"/><path d="M11 8v6"/></svg>`,
-            color: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 14.7255 3.09032 17.1962 4.85857 19C5.35843 19.5 5.25302 20.3129 4.67323 20.612C3.86477 21.0292 3 21.4398 3 22H12Z"/><circle cx="7.5" cy="10.5" r="1.5"/><circle cx="11.5" cy="7.5" r="1.5"/><circle cx="16.5" cy="9.5" r="1.5"/><circle cx="15.5" cy="14.5" r="1.5"/></svg>`
+            color: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 14.7255 3.09032 17.1962 4.85857 19C5.35843 19.5 5.25302 20.3129 4.67323 20.612C3.86477 21.0292 3 21.4398 3 22H12Z"/><circle cx="7.5" cy="10.5" r="1.5"/><circle cx="11.5" cy="7.5" r="1.5"/><circle cx="16.5" cy="9.5" r="1.5"/><circle cx="15.5" cy="14.5" r="1.5"/></svg>`,
+            sql: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 6v6c0 1.66 4 3 9 3s9-1.34 9-3V6"/><path d="M3 12v6c0 1.66 4 3 9 3s9-1.34 9-3v-6"/></svg>`,
+            ip: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+            hash: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="5"/></svg>`,
+            qrcode: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="17" y="17" width="1.5" height="1.5"/><rect x="20.5" y="17" width="1.5" height="1.5"/><rect x="14" y="17" width="1.5" height="1.5"/><rect x="17" y="14" width="1.5" height="1.5"/><rect x="20.5" y="20.5" width="1.5" height="1.5"/></svg>`,
+            lorem: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
+            yaml: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M10 9H8v6h2"/><path d="M16 13h-4l4-4v6"/></svg>`,
+            cert: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>`,
         },
         tools: [
             { id: 'json',     title: 'JSON Formatter',      description: 'Format, minify & validate JSON.' },
@@ -57,6 +73,13 @@ window.devToolkitApp = function devToolkitApp() {
             { id: 'epoch',    title: 'Epoch Converter',      description: 'Convert Unix timestamp to human datetime.' },
             { id: 'regex',    title: 'Regex Tester',         description: 'Match patterns against test text.' },
             { id: 'color',    title: 'Color Converter',      description: 'Convert HEX, RGB, HSL and preview colors.' },
+            { id: 'sql',      title: 'SQL Formatter',        description: 'Format & minify SQL queries with syntax highlighting.' },
+            { id: 'ip',       title: 'IP / Geo Lookup',      description: 'Look up IP geolocation, ISP, and timezone info.' },
+            { id: 'hash',     title: 'Hash Generator',       description: 'Generate MD5, SHA-1, SHA-256, SHA-384, SHA-512 hashes.' },
+            { id: 'qrcode',   title: 'QR Code Generator',    description: 'Generate QR codes from any text or URL.' },
+            { id: 'lorem',    title: 'Lorem Ipsum Gen',      description: 'Generate placeholder text for mockups and designs.' },
+            { id: 'yaml',     title: 'YAML ↔ JSON',          description: 'Convert between YAML and JSON formats.' },
+            { id: 'cert',     title: 'Certificate Decoder',  description: 'Decode X.509 certificates and view their details.' },
         ],
         activeTool: loadFromLocalStorage('dev-toolkit.active-tool', null),
         toolSearch: '',
@@ -76,6 +99,13 @@ window.devToolkitApp = function devToolkitApp() {
             epoch: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
             regex: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><path d="M8 11h6"/><path d="M11 8v6"/></svg>`,
             color: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 14.7255 3.09032 17.1962 4.85857 19C5.35843 19.5 5.25302 20.3129 4.67323 20.612C3.86477 21.0292 3 21.4398 3 22H12Z"/><circle cx="7.5" cy="10.5" r="1.5"/><circle cx="11.5" cy="7.5" r="1.5"/><circle cx="16.5" cy="9.5" r="1.5"/><circle cx="15.5" cy="14.5" r="1.5"/></svg>`,
+            sql: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 6v6c0 1.66 4 3 9 3s9-1.34 9-3V6"/><path d="M3 12v6c0 1.66 4 3 9 3s9-1.34 9-3v-6"/></svg>`,
+            ip: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+            hash: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="5"/></svg>`,
+            qrcode: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="17" y="17" width="1.5" height="1.5"/><rect x="20.5" y="17" width="1.5" height="1.5"/><rect x="14" y="17" width="1.5" height="1.5"/><rect x="17" y="14" width="1.5" height="1.5"/><rect x="20.5" y="20.5" width="1.5" height="1.5"/></svg>`,
+            lorem: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
+            yaml: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M10 9H8v6h2"/><path d="M16 13h-4l4-4v6"/></svg>`,
+            cert: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>`,
         },
         toolInfoTips: {
             json: {
@@ -130,8 +160,37 @@ window.devToolkitApp = function devToolkitApp() {
                 what: 'Convert colors between HEX, RGB, and HSL formats. Click the preview box to open a native color picker.',
                 tip: 'HEX is best for CSS. RGB/RGBA for dynamic transparency. HSL is the most human-readable — tweak <strong>Lightness</strong> for hover states and <strong>Saturation</strong> for muted variants. The picker syncs both ways.',
             },
+            sql: {
+                what: 'Format messy SQL into clean, readable queries. Uppercases keywords, adds line breaks before clauses, and indents for visual hierarchy.',
+                tip: 'Paste the output of an ORM query log or a one-liner from a code review. Works with <strong>SELECT, INSERT, UPDATE, DELETE, JOINs, CTEs, window functions</strong> and more. Use <strong>Minify</strong> before embedding in application code.',
+            },
+            ip: {
+                what: 'Look up geolocation data for any IPv4 or IPv6 address — country, city, ISP, timezone, and coordinates.',
+                tip: 'Leave the input <strong>empty</strong> to look up your own IP. Useful for debugging CDN routing, verifying VPN connections, or checking where your users are coming from.',
+            },
+            hash: {
+                what: 'Generate cryptographic hash digests from any input text. Supports MD5, SHA-1, SHA-256, SHA-384, and SHA-512.',
+                tip: '<strong>SHA-256</strong> is the modern standard for integrity checks. <strong>MD5</strong> and <strong>SHA-1</strong> are fast but cryptographically broken — only use them for checksums, never for passwords.',
+            },
+            qrcode: {
+                what: 'Turn any text or URL into a QR code image. Scan it with your phone camera to instantly open links or read data.',
+                tip: 'QR codes can store up to <strong>4,296 alphanumeric characters</strong>. Use them for WiFi credentials, deep links, contact cards, or two-factor auth setup keys.',
+            },
+            lorem: {
+                what: 'Generate Lorem Ipsum placeholder text — the classic dummy text used in design mockups since the 1500s.',
+                tip: 'Generate by <strong>words, sentences, or paragraphs</strong>. Use paragraphs for layout testing, sentences for headings, and words for button labels.',
+            },
+            yaml: {
+                what: 'Convert between YAML (human-friendly config format) and JSON (machine-friendly data format) with a single click.',
+                tip: 'YAML is the standard for <strong>Docker Compose, GitHub Actions, Kubernetes, Ansible, and CI/CD pipelines</strong>. Convert your existing JSON configs to YAML or vice versa.',
+            },
+            cert: {
+                what: 'Decode X.509 SSL/TLS certificates. Paste a PEM file to extract issuer, subject, validity period, and serial number.',
+                tip: 'Use this to check when a certificate <strong>expires</strong>, verify the <strong>issuer</strong>, or debug SSL chain issues. The cert data never leaves your browser.',
+            },
         },
         showToolInfo: true,
+        showMobileMenu: false,
         dark: loadFromLocalStorage('dev-toolkit.theme', 'dark') !== 'light',
         toast: '',
         toastTimer: null,
@@ -228,6 +287,46 @@ window.devToolkitApp = function devToolkitApp() {
             message: '',
         },
 
+        // ── New Tools ──
+        sqlTool: {
+            input: loadFromLocalStorage('dev-toolkit.sql.input', 'select id, name, email from users where status = 1 order by created_at desc limit 10'),
+            output: '',
+            error: false,
+            message: 'Paste a SQL query then Format or Minify.',
+        },
+        ipTool: {
+            input: '',
+            result: null,
+            loading: false,
+            error: '',
+        },
+        hashTool: {
+            input: loadFromLocalStorage('dev-toolkit.hash.input', 'Hello World'),
+            results: null,
+            loading: false,
+        },
+        qrTool: {
+            input: loadFromLocalStorage('dev-toolkit.qr.input', 'https://toolkit.minhnv.work'),
+            size: 256,
+            imageUrl: '',
+        },
+        loremTool: {
+            type: 'paragraphs',
+            count: 3,
+            output: '',
+        },
+        yamlTool: {
+            yamlInput: loadFromLocalStorage('dev-toolkit.yaml.input', 'name: My App\nversion: "1.0"\nserver:\n  port: 8080\n  host: 0.0.0.0'),
+            jsonInput: '',
+            error: false,
+            message: 'Convert YAML → JSON or paste JSON to convert back.',
+        },
+        certTool: {
+            input: '',
+            result: null,
+            error: '',
+        },
+
         init() {
             document.documentElement.classList.toggle('dark', this.dark);
 
@@ -243,6 +342,8 @@ window.devToolkitApp = function devToolkitApp() {
             this.runColor();
             this.runEpochToDate();
             this.runDateToEpoch();
+            this.runQrCode();
+            this.runHash();
 
             // Set live epoch timer
             setInterval(() => {
@@ -277,14 +378,15 @@ window.devToolkitApp = function devToolkitApp() {
             this.activeTool = toolId;
             this.toolSearch = '';
             this.filterTools();
+            this.showMobileMenu = false;
             saveToLocalStorage('dev-toolkit.active-tool', toolId || '');
         },
 
         // Tool search & filter
         filterTools() {
             const query = (this.toolSearch || '').toLowerCase().trim();
-            const formatterIds = ['json', 'html', 'diff', 'case', 'constant', 'bem'];
-            const converterIds = ['base64', 'url', 'jwt', 'uuid', 'epoch', 'regex', 'color'];
+            const formatterIds = ['json', 'html', 'diff', 'case', 'constant', 'bem', 'sql'];
+            const converterIds = ['base64', 'url', 'jwt', 'uuid', 'epoch', 'regex', 'color', 'ip', 'hash', 'qrcode', 'lorem', 'yaml', 'cert'];
 
             const match = (tool) => {
                 if (!query) return true;
@@ -315,6 +417,13 @@ window.devToolkitApp = function devToolkitApp() {
                 epoch:    '',
                 regex:    'Ctrl+Enter  Test Match',
                 color:    '',
+                sql:      'Ctrl+Enter  Format',
+                ip:       'Enter  Lookup',
+                hash:     '',
+                qrcode:   '',
+                lorem:    'Ctrl+Enter  Generate',
+                yaml:     '',
+                cert:     'Ctrl+Enter  Decode',
             };
             return hints[tool.id] || '';
         },
@@ -363,6 +472,13 @@ window.devToolkitApp = function devToolkitApp() {
                 epoch: () => {},
                 regex: () => this.runRegex(),
                 color: () => {},
+                sql: () => this.runSqlFormat(),
+                ip: () => this.runIpLookup(),
+                hash: () => this.runHash(),
+                qrcode: () => this.runQrCode(),
+                lorem: () => this.generateLorem(),
+                yaml: () => this.runYamlToJson(),
+                cert: () => this.runCertDecode(),
             };
             const action = actions[this.activeTool];
             if (action) {
@@ -435,7 +551,9 @@ window.devToolkitApp = function devToolkitApp() {
                 if (!res.ok) throw new Error(data.message || 'Lỗi server');
                 this.jsonShare.url = data.url;
                 this.jsonShare.expiresAt = data.expires_at;
-                this.showToast('Link chia sẻ đã được tạo!');
+                // Auto-copy link vào clipboard
+                copyToClipboard(data.url, () => {});
+                this.showToast('Link đã được copy!');
             } catch (e) {
                 this.jsonShare.error = e.message;
             } finally {
@@ -671,6 +789,158 @@ window.devToolkitApp = function devToolkitApp() {
             }
         },
 
+        // SQL Formatter
+        persistSqlInput() { saveToLocalStorage('dev-toolkit.sql.input', this.sqlTool.input); },
+        runSqlFormat() {
+            try {
+                this.sqlTool.output = formatSql(this.sqlTool.input);
+                this.sqlTool.error = false;
+                this.sqlTool.message = 'SQL formatted successfully.';
+            } catch (e) {
+                this.sqlTool.error = true;
+                this.sqlTool.message = e.message;
+            }
+        },
+        runSqlMinify() {
+            this.sqlTool.output = minifySql(this.sqlTool.input);
+            this.sqlTool.error = false;
+            this.sqlTool.message = 'SQL minified successfully.';
+        },
+        swapSql() {
+            if (!this.sqlTool.output) return;
+            this.sqlTool.input = this.sqlTool.output;
+            this.sqlTool.output = '';
+            this.persistSqlInput();
+        },
+        copySqlOutput() { this.copy(this.sqlTool.output); },
+
+        // IP Lookup
+        async runIpLookup(inputIp) {
+            const ip = inputIp !== undefined ? inputIp : this.ipTool.input;
+            this.ipTool.loading = true;
+            this.ipTool.error = '';
+            this.ipTool.result = null;
+            try {
+                this.ipTool.result = await lookupIp(ip);
+            } catch (e) {
+                this.ipTool.error = e.message;
+            } finally {
+                this.ipTool.loading = false;
+            }
+        },
+        copyIp(field) {
+            if (this.ipTool.result && this.ipTool.result[field]) {
+                this.copy(this.ipTool.result[field]);
+            }
+        },
+
+        // Hash Generator
+        async runHash() {
+            if (!this.hashTool.input) return;
+            this.hashTool.loading = true;
+            this.hashTool.results = null;
+            try {
+                this.hashTool.results = await generateAllHashes(this.hashTool.input);
+            } catch (e) {
+                // ignore
+            } finally {
+                this.hashTool.loading = false;
+            }
+        },
+        copyHash(value) { this.copy(value); },
+        persistHashInput() {
+            saveToLocalStorage('dev-toolkit.hash.input', this.hashTool.input);
+            this.runHash();
+        },
+
+        // QR Code
+        runQrCode() {
+            const text = this.qrTool.input.trim();
+            if (!text) { this.qrTool.imageUrl = ''; return; }
+            const size = Math.min(Math.max(Number(this.qrTool.size), 128), 1024);
+            this.qrTool.imageUrl = generateQrCode(text, size);
+        },
+        persistQrInput() {
+            saveToLocalStorage('dev-toolkit.qr.input', this.qrTool.input);
+            this.runQrCode();
+        },
+
+        // Lorem Ipsum
+        generateLorem() {
+            this.loremTool.output = generateLorem(this.loremTool.type, this.loremTool.count);
+            this.showToast('Generated!');
+        },
+        copyLorem() { this.copy(this.loremTool.output); },
+
+        // YAML ↔ JSON
+        runYamlToJson() {
+            try {
+                const json = yamlToJson(this.yamlTool.yamlInput);
+                this.yamlTool.jsonInput = json;
+                this.yamlTool.error = false;
+                this.yamlTool.message = 'YAML → JSON converted successfully.';
+            } catch (e) {
+                this.yamlTool.error = true;
+                this.yamlTool.message = 'YAML parse error: ' + e.message;
+            }
+        },
+        runJsonToYaml() {
+            try {
+                const yamlStr = jsonToYaml(this.yamlTool.jsonInput);
+                this.yamlTool.yamlInput = yamlStr;
+                this.yamlTool.error = false;
+                this.yamlTool.message = 'JSON → YAML converted successfully.';
+            } catch (e) {
+                this.yamlTool.error = true;
+                this.yamlTool.message = 'JSON parse error: ' + e.message;
+            }
+        },
+        copyYamlOutput() { this.copy(this.yamlTool.yamlInput); },
+        copyJsonFromYaml() { this.copy(this.yamlTool.jsonInput); },
+        persistYamlInput() {
+            saveToLocalStorage('dev-toolkit.yaml.input', this.yamlTool.yamlInput);
+        },
+        swapYamlJson() {
+            const y = this.yamlTool.yamlInput;
+            const j = this.yamlTool.jsonInput;
+            this.yamlTool.yamlInput = j;
+            this.yamlTool.jsonInput = y;
+        },
+
+        // Certificate Decoder
+        runCertDecode() {
+            this.certTool.error = '';
+            this.certTool.result = null;
+            try {
+                this.certTool.result = decodeCertificate(this.certTool.input);
+                // Compute fingerprints async
+                this.computeCertFingerprints(this.certTool.input);
+            } catch (e) {
+                this.certTool.error = e.message;
+            }
+        },
+        async computeCertFingerprints(pem) {
+            const match = pem.match(/-----BEGIN CERTIFICATE-----([\s\S]*?)-----END CERTIFICATE-----/);
+            if (!match) return;
+            const binary = atob(match[1].replace(/\s+/g, ''));
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+
+            try {
+                const [sha1, sha256] = await Promise.all([
+                    crypto.subtle.digest('SHA-1', bytes),
+                    crypto.subtle.digest('SHA-256', bytes),
+                ]);
+                const toHex = (buf) => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join(':');
+                if (this.certTool.result) {
+                    this.certTool.result.fingerprintSHA1 = toHex(sha1);
+                    this.certTool.result.fingerprintSHA256 = toHex(sha256);
+                }
+            } catch (e) {
+                // ignore
+            }
+        },
+
         // Clear utilities
         clearInput(toolId) {
             if (toolId === 'json') {
@@ -725,6 +995,36 @@ window.devToolkitApp = function devToolkitApp() {
             } else if (toolId === 'color') {
                 this.colorTool.input = '';
                 this.persistColorInput();
+            } else if (toolId === 'sql') {
+                this.sqlTool.input = '';
+                this.sqlTool.output = '';
+                this.persistSqlInput();
+                this.sqlTool.error = false;
+                this.sqlTool.message = '';
+            } else if (toolId === 'ip') {
+                this.ipTool.input = '';
+                this.ipTool.result = null;
+                this.ipTool.error = '';
+            } else if (toolId === 'hash') {
+                this.hashTool.input = '';
+                this.hashTool.results = null;
+                this.persistHashInput();
+            } else if (toolId === 'qrcode') {
+                this.qrTool.input = '';
+                this.qrTool.imageUrl = '';
+                this.persistQrInput();
+            } else if (toolId === 'lorem') {
+                this.loremTool.output = '';
+            } else if (toolId === 'yaml') {
+                this.yamlTool.yamlInput = '';
+                this.yamlTool.jsonInput = '';
+                this.persistYamlInput();
+                this.yamlTool.error = false;
+                this.yamlTool.message = '';
+            } else if (toolId === 'cert') {
+                this.certTool.input = '';
+                this.certTool.result = null;
+                this.certTool.error = '';
             }
         },
 
