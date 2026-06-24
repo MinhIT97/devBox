@@ -1230,7 +1230,7 @@
 
             </section>
 
-            {{-- ── Image Cropper ── }}
+            {{-- Image Cropper --}}
             <section x-show="activeTool === 'cropper'" x-cloak class="tool-section-enter">
                 <div class="toolbar cropper-toolbar">
                     <button id="cropper-crop-btn" type="button" class="btn-primary" @click="runCropImage()" :disabled="!cropperTool.imageSrc || cropperTool.processing">
@@ -1301,19 +1301,19 @@
                             <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px">
                                 <div>
                                     <span style="font-size:10px; color:var(--text-muted)">X</span>
-                                    <input type="number" class="input-shell" style="width:100%" x-model="cropperTool.crop.x" min="0" @input="onCropRectChange({x: cropperTool.crop.x, y: cropperTool.crop.y, width: cropperTool.crop.width, height: cropperTool.crop.height})">
+                                    <input type="number" class="input-shell" style="width:100%" x-model="cropperTool.crop.x" min="0" @input="onCropRectChange(cropperTool.crop)">
                                 </div>
                                 <div>
                                     <span style="font-size:10px; color:var(--text-muted)">Y</span>
-                                    <input type="number" class="input-shell" style="width:100%" x-model="cropperTool.crop.y" min="0" @input="onCropRectChange({x: cropperTool.crop.x, y: cropperTool.crop.y, width: cropperTool.crop.width, height: cropperTool.crop.height})">
+                                    <input type="number" class="input-shell" style="width:100%" x-model="cropperTool.crop.y" min="0" @input="onCropRectChange(cropperTool.crop)">
                                 </div>
                                 <div>
                                     <span style="font-size:10px; color:var(--text-muted)">Width</span>
-                                    <input type="number" class="input-shell" style="width:100%" x-model="cropperTool.crop.width" min="1" @input="onCropRectChange({x: cropperTool.crop.x, y: cropperTool.crop.y, width: cropperTool.crop.width, height: cropperTool.crop.height})">
+                                    <input type="number" class="input-shell" style="width:100%" x-model="cropperTool.crop.width" min="1" @input="onCropRectChange(cropperTool.crop)">
                                 </div>
                                 <div>
                                     <span style="font-size:10px; color:var(--text-muted)">Height</span>
-                                    <input type="number" class="input-shell" style="width:100%" x-model="cropperTool.crop.height" min="1" @input="onCropRectChange({x: cropperTool.crop.x, y: cropperTool.crop.y, width: cropperTool.crop.width, height: cropperTool.crop.height})">
+                                    <input type="number" class="input-shell" style="width:100%" x-model="cropperTool.crop.height" min="1" @input="onCropRectChange(cropperTool.crop)">
                                 </div>
                             </div>
                             <div style="font-size:10px; color:var(--text-muted); margin-top:8px">

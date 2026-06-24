@@ -801,12 +801,9 @@ function parseX509Certificate(bytes) {
     return info;
 }
 
-// Simple SHA-1 for fingerprint (sync, for cert display)
+// Placeholder — actual fingerprints are computed async in app.js via crypto.subtle
 function calculateFingerprint(bytes, algo) {
-    // Use a simpler approach — hex of raw bytes for display
-    // Since we can't use async crypto here easily, let's compute a hex dump
-    // For now return placeholder that gets filled async
-    return { bytes, algo };
+ return null;
 }
 
 function parseDN() {
@@ -897,7 +894,7 @@ export function loadImageFromFile(file) {
  reader.onerror = () => reject(new Error('Failed to read file.'));
  reader.onload = (e) => {
  const img = new Image();
- img.onload = () => resolve({ image: img, dataUrl: e.target.result });
+  img.onload = () => resolve({ image: img, dataUrl: e.target.result });
  img.onerror = () => reject(new Error('Failed to decode image. The file may be corrupted.'));
  img.src = e.target.result;
  };

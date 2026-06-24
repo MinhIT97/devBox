@@ -371,7 +371,11 @@ window.devToolkitApp = function devToolkitApp() {
             document.documentElement.classList.toggle('dark', this.dark);
             this.boundCropperPointerMove = (event) => this.handleCropperPointerMove(event);
             this.boundCropperPointerUp = () => this.endCropperInteraction();
-            window.addEventListener('resize', () => this.syncCropperStage());
+            window.addEventListener('resize', () => {
+                this.syncCropperStage();
+                // Force Alpine to re-evaluate cropperSelectionStyle() and overlay percentages
+                this.cropperTool.crop = { ...this.cropperTool.crop };
+            });
 
             // Initialize tool filters
             this.filterTools();
@@ -1079,7 +1083,11 @@ window.devToolkitApp = function devToolkitApp() {
                 startY: point.y,
                 startCrop: { ...this.cropperTool.crop },
             };
-            event.target.setPointerCapture?.(event.pointerId);
+            if (event.target.setPointerCapture) {
+                event.target.setPointerCapture(event.pointerId);
+                this._cropperPointerTarget = event.target;
+                this._cropperPointerId = event.pointerId;
+            }
             window.addEventListener('pointermove', this.boundCropperPointerMove);
             window.addEventListener('pointerup', this.boundCropperPointerUp, { once: true });
         },
@@ -1130,6 +1138,13 @@ window.devToolkitApp = function devToolkitApp() {
         },
         endCropperInteraction() {
             window.removeEventListener('pointermove', this.boundCropperPointerMove);
+            // Release pointer capture if set
+            const target = this._cropperPointerTarget;
+            if (target) {
+                target.releasePointerCapture?.(this._cropperPointerId);
+                this._cropperPointerTarget = null;
+                this._cropperPointerId = null;
+            }
             this.cropperTool.interaction = {
                 active: false,
                 mode: '',
@@ -1305,8 +1320,8 @@ window.devToolkitApp = function devToolkitApp() {
             this.cropperTool.outputFormat = 'image/png';
             this.cropperTool.quality = 92;
             this.cropperTool.resizeEnabled = false;
-            this.cropperTool.resizeWidth = 0;
-            this.cropperTool.resizeHeight = 0;
+            this.cropperTool.resizeWidth = 1;
+            this.cropperTool.resizeHeight = 1;
             this.cropperTool.result = null;
             this.cropperTool.processing = false;
             this.cropperTool.error = '';
