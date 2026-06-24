@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('title', 'Dev Toolkit — Daily utilities for developers')
 
@@ -321,7 +321,7 @@
                 </div>
             </template>
 
-            {{-- ── JSON Formatter ── --}}
+            {{-- -- JSON Formatter -- --}}
             <section x-show="activeTool === 'json'" x-cloak class="tool-section-enter">
                 <div class="toolbar">
                     <button id="json-format-btn"   type="button" class="btn-primary" @click="formatJson()">Format</button>
@@ -417,7 +417,7 @@
                 </div>
             </section>
 
-            {{-- ── Case Converter ── --}}
+            {{-- -- Case Converter -- --}}
             <section x-show="activeTool === 'case'" x-cloak class="tool-section-enter">
                 <div class="toolbar">
                     <button id="case-convert-btn" type="button" class="btn-primary" @click="convertCase()">Convert</button>
@@ -462,7 +462,7 @@
                 </div>
             </section>
 
-            {{-- ── Constant Generator ── --}}
+            {{-- -- Constant Generator -- --}}
             <section x-show="activeTool === 'constant'" x-cloak class="tool-section-enter">
                 <div class="toolbar">
                     <button id="const-generate-btn" type="button" class="btn-primary" @click="generateConstant()">Generate</button>
@@ -502,7 +502,7 @@
                 </div>
             </section>
 
-            {{-- ── BEM Generator ── --}}
+            {{-- -- BEM Generator -- --}}
             <section x-show="activeTool === 'bem'" x-cloak class="tool-section-enter">
                 <div class="toolbar">
                     <button id="bem-generate-btn" type="button" class="btn-primary" @click="generateBem()">Generate</button>
@@ -542,7 +542,7 @@
                 </div>
             </section>
 
-            {{-- ── Base64 Tool ── --}}
+            {{-- -- Base64 Tool -- --}}
             <section x-show="activeTool === 'base64'" x-cloak class="tool-section-enter">
                 <div class="toolbar">
                     <button id="base64-encode-btn" type="button" class="btn-primary" @click="runBase64Encode()">Encode</button>
@@ -583,7 +583,7 @@
                 ></p>
             </section>
 
-            {{-- ── URL Tool ── --}}
+            {{-- -- URL Tool -- --}}
             <section x-show="activeTool === 'url'" x-cloak class="tool-section-enter">
                 <div class="toolbar">
                     <button id="url-encode-btn" type="button" class="btn-primary" @click="runUrlEncode()">Encode</button>
@@ -624,7 +624,7 @@
                 ></p>
             </section>
 
-            {{-- ── JWT Decoder ── --}}
+            {{-- -- JWT Decoder -- --}}
             <section x-show="activeTool === 'jwt'" x-cloak class="tool-section-enter">
                 <div class="toolbar">
                     <button id="jwt-decode-btn" type="button" class="btn-primary" @click="runJwtDecode()">Decode</button>
@@ -679,7 +679,7 @@
                 ></p>
             </section>
 
-            {{-- ── Diff Checker ── --}}
+            {{-- -- Diff Checker -- --}}
             <section x-show="activeTool === 'diff'" x-cloak class="tool-section-enter">
                 <div class="toolbar">
                     <button id="diff-compare-btn" type="button" class="btn-primary" @click="runDiff()">Compare</button>
@@ -725,7 +725,7 @@
                 </div>
             </section>
 
-            {{-- ── UUID & Key Gen ── --}}
+            {{-- -- UUID & Key Gen -- --}}
             <section x-show="activeTool === 'uuid'" x-cloak class="tool-section-enter">
                 <div style="display:grid; gap:16px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr))">
                     <div class="tool-panel">
@@ -776,7 +776,7 @@
                 </div>
             </section>
 
-            {{-- ── HTML Formatter ── --}}
+            {{-- -- HTML Formatter -- --}}
             <section x-show="activeTool === 'html'" x-cloak class="tool-section-enter">
                 <div class="toolbar">
                     <button id="html-format-btn" type="button" class="btn-primary" @click="runHtmlFormat()">Format</button>
@@ -817,7 +817,7 @@
                 ></p>
             </section>
 
-            {{-- ── Epoch Converter ── --}}
+            {{-- -- Epoch Converter -- --}}
             <section x-show="activeTool === 'epoch'" x-cloak class="tool-section-enter">
                 <div class="tool-panel tool-panel-accent" style="margin-bottom:16px; display:flex; align-items:center; justify-content:space-between">
                     <div>
@@ -887,7 +887,7 @@
                 </div>
             </section>
 
-            {{-- ── Regex Tester ── --}}
+            {{-- -- Regex Tester -- --}}
             <section x-show="activeTool === 'regex'" x-cloak class="tool-section-enter">
                 <div class="toolbar">
                     <button id="regex-test-btn" type="button" class="btn-primary" @click="runRegex()">Test Match</button>
@@ -950,7 +950,7 @@
                 ></p>
             </section>
 
-            {{-- ── Color Converter ── --}}
+            {{-- -- Color Converter -- --}}
             <section x-show="activeTool === 'color'" x-cloak class="tool-section-enter">
                 <div class="tool-panel" style="display:grid; gap:16px; grid-template-columns: 1fr 160px; margin-bottom:16px">
                     <div>
@@ -1017,7 +1017,7 @@
                 ></p>
             </section>
 
-            {{-- ── SQL Formatter ── --}}
+            {{-- -- SQL Formatter -- --}}
             <section x-show="activeTool === 'sql'" x-cloak class="tool-section-enter">
                 <div class="toolbar">
                     <button id="sql-format-btn" type="button" class="btn-primary" @click="runSqlFormat()">Format</button>
@@ -1039,7 +1039,7 @@
                 <p class="json-status" x-show="sqlTool.message" :class="sqlTool.error ? 'json-status-error' : 'json-status-ok'" x-text="sqlTool.message" style="margin-top:12px"></p>
             </section>
 
-            {{-- ── IP / Geo Lookup ── --}}
+            {{-- -- IP / Geo Lookup -- --}}
             <section x-show="activeTool === 'ip'" x-cloak class="tool-section-enter">
                 <div class="toolbar">
                     <button id="ip-lookup-btn" type="button" class="btn-primary" @click="runIpLookup()" :disabled="ipTool.loading">
@@ -1080,7 +1080,7 @@
                 <div x-show="ipTool.error" class="json-share-error" style="margin-top:12px" x-text="ipTool.error"></div>
             </section>
 
-            {{-- ── Hash Generator ── --}}
+            {{-- -- Hash Generator -- --}}
             <section x-show="activeTool === 'hash'" x-cloak class="tool-section-enter">
                 <div class="toolbar">
                     <button id="hash-gen-btn"  type="button" class="btn-primary" @click="runHash()" :disabled="hashTool.loading">Generate</button>
@@ -1114,7 +1114,7 @@
                 </template>
             </section>
 
-            {{-- ── QR Code Generator ── --}}
+            {{-- -- QR Code Generator -- --}}
             <section x-show="activeTool === 'qrcode'" x-cloak class="tool-section-enter">
                 <div class="toolbar">
                     <button id="qr-gen-btn"   type="button" class="btn-primary" @click="runQrCode()">Generate</button>
@@ -1146,7 +1146,7 @@
                 </div>
             </section>
 
-            {{-- ── Lorem Ipsum Generator ── --}}
+            {{-- -- Lorem Ipsum Generator -- --}}
             <section x-show="activeTool === 'lorem'" x-cloak class="tool-section-enter">
                 <div class="toolbar">
                     <button id="lorem-gen-btn"  type="button" class="btn-primary" @click="generateLorem()">Generate</button>
@@ -1165,7 +1165,7 @@
                 </div>
             </section>
 
-            {{-- ── YAML ↔ JSON ── --}}
+            {{-- -- YAML ↔ JSON -- --}}
             <section x-show="activeTool === 'yaml'" x-cloak class="tool-section-enter">
                 <div class="toolbar">
                     <button id="yaml-to-json-btn" type="button" class="btn-primary" @click="runYamlToJson()">YAML → JSON</button>
@@ -1192,7 +1192,7 @@
                 <p class="json-status" x-show="yamlTool.message" :class="yamlTool.error ? 'json-status-error' : 'json-status-ok'" x-text="yamlTool.message" style="margin-top:12px"></p>
             </section>
 
-            {{-- ── Certificate Decoder ── --}}
+            {{-- -- Certificate Decoder -- --}}
             <section x-show="activeTool === 'cert'" x-cloak class="tool-section-enter">
                 <div class="toolbar">
                     <button id="cert-decode-btn" type="button" class="btn-primary" @click="runCertDecode()">Decode</button>
@@ -1402,3 +1402,4 @@
     </main>
 </div>
 @endsection
+
