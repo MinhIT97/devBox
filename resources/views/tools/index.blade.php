@@ -1228,9 +1228,11 @@
                     </div>
                 </template>
 
+            </section>
+
             {{-- ── Image Cropper ── }}
             <section x-show="activeTool === 'cropper'" x-cloak class="tool-section-enter">
-                <div class="toolbar">
+                <div class="toolbar cropper-toolbar">
                     <button id="cropper-crop-btn" type="button" class="btn-primary" @click="runCropImage()" :disabled="!cropperTool.imageSrc || cropperTool.processing">
                         <span x-show="!cropperTool.processing">Crop</span>
                         <span x-show="cropperTool.processing">Processing...</span>
@@ -1242,40 +1244,57 @@
                 </div>
 
                 {{-- Upload Area --}}
-                <div x-show="!cropperTool.imageSrc" class="tool-panel" style="text-align:center; padding:56px 24px; border:2px dashed var(--border); border-radius:var(--radius-xl)">
-                    <label for="cropper-file-input" style="display:block; cursor:pointer; width:100%">
-                        <svg style="display:block; margin:0 auto 16px; color:var(--accent); opacity:0.5" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                        <span style="color:var(--text-muted); font-size:14px">Click or drag to upload an image</span><br>
+                <div x-show="!cropperTool.imageSrc"
+                    class="cropper-upload"
+                    :class="{ 'is-dragging': cropperTool.draggingUpload }"
+                    @dragover.prevent="cropperTool.draggingUpload = true"
+                    @dragleave.prevent="cropperTool.draggingUpload = false"
+                    @drop.prevent="onCropperDrop($event)">
+                    <label for="cropper-file-input" class="cropper-upload-label">
+                        <svg class="cropper-upload-icon" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        <span class="cropper-upload-title">Click or drag an image here</span>
                         <span style="color:var(--text-muted); font-size:11px; margin-top:4px; display:inline-block">PNG, JPG, GIF, WebP, BMP — up to 20 MB</span>
                     </label>
-                    <input type="file" id="cropper-file-input" accept="image/png,image/jpeg,image/gif,image/webp,image/bmp" style="display:none" @change="onCropperFileChange($event)">
+                    <input type="file" id="cropper-file-input" accept="image/png,image/jpeg,image/gif,image/webp,image/bmp" class="cropper-file-input" @change="onCropperFileChange($event)">
                 </div>
 
                 {{-- Main Crop Area --}}
-                <div x-show="cropperTool.imageSrc" style="display:grid; gap:16px; grid-template-columns: 1fr 300px">
-                    {{-- Image Preview with Crop Overlay --}}
-                    <div class="tool-panel" style="position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; min-height:380px; background:repeating-conic-gradient(var(--border) 0% 25%, transparent 0% 50%) 50% / 20px 20px">
-                        {{-- Image --}}
-                        <img :src="cropperTool.imageSrc" style="display:block; max-width:100%; max-height:600px; position:relative; z-index:1" :id="'cropper-img'" class="cropper-img">
-                        {{-- Dark overlay: top strip --}}
-                        <div style="position:absolute; top:0; left:0; right:0; background:rgba(0,0,0,0.55); z-index:2"
-                            :style="'height:' + (Math.max(0, cropperTool.crop.y) / cropperTool.naturalHeight * 100) + '%'"></div>
-                        {{-- Dark overlay: bottom strip --}}
-                        <div style="position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.55); z-index:2"
-                            :style="'height:' + (Math.max(0, (cropperTool.naturalHeight - cropperTool.crop.y - cropperTool.crop.height)) / cropperTool.naturalHeight * 100) + '%'"></div>
-                        {{-- Dark overlay: left strip --}}
-                        <div style="position:absolute; top:0; bottom:0; left:0; background:rgba(0,0,0,0.55); z-index:2"
-                            :style="'width:' + (Math.max(0, cropperTool.crop.x) / cropperTool.naturalWidth * 100) + '%'"></div>
-                        {{-- Dark overlay: right strip --}}
-                        <div style="position:absolute; top:0; bottom:0; right:0; background:rgba(0,0,0,0.55); z-index:2"
-                            :style="'width:' + (Math.max(0, (cropperTool.naturalWidth - cropperTool.crop.x - cropperTool.crop.width)) / cropperTool.naturalWidth * 100) + '%'"></div>
-                        {{-- Crop border --}}
-                        <div style="position:absolute; border:2px dashed #fff; z-index:3; pointer-events:none; box-shadow:0 0 0 9999px rgba(0,0,0,0)"
-                            :style="'left:' + (cropperTool.crop.x / cropperTool.naturalWidth * 100) + '%;top:' + (cropperTool.crop.y / cropperTool.naturalHeight * 100) + '%;width:' + (cropperTool.crop.width / cropperTool.naturalWidth * 100) + '%;height:' + (cropperTool.crop.height / cropperTool.naturalHeight * 100) + '%'"></div>
+                <div x-show="cropperTool.imageSrc" class="cropper-workspace">
+                    <div class="tool-panel cropper-stage-panel">
+                        <div class="cropper-stage-head">
+                            <div>
+                                <span class="field-label">Crop Preview</span>
+                                <p class="cropper-hint">Drag inside the box to move it. Pull a handle to resize.</p>
+                            </div>
+                            <label for="cropper-file-input" class="btn cropper-replace-btn">Replace image</label>
+                        </div>
+                        <div class="cropper-stage"
+                            x-ref="cropperStage"
+                            :class="{ 'is-moving': cropperTool.interaction.active }"
+                            @pointerdown="startCropperDraw($event)"
+                            @dragover.prevent
+                            @drop.prevent="onCropperDrop($event)">
+                            <img :src="cropperTool.imageSrc" class="cropper-img" alt="Image to crop" @load="syncCropperStage()">
+                            <div class="cropper-selection"
+                                :style="cropperSelectionStyle()"
+                                @pointerdown.stop="startCropperMove($event)">
+                                <div class="cropper-rule cropper-rule-v cropper-rule-v1"></div>
+                                <div class="cropper-rule cropper-rule-v cropper-rule-v2"></div>
+                                <div class="cropper-rule cropper-rule-h cropper-rule-h1"></div>
+                                <div class="cropper-rule cropper-rule-h cropper-rule-h2"></div>
+                                <template x-for="handle in cropperHandles" :key="handle">
+                                    <button type="button"
+                                        class="cropper-handle"
+                                        :class="'cropper-handle-' + handle"
+                                        :aria-label="'Resize crop ' + handle"
+                                        @pointerdown.stop="startCropperResize($event, handle)"></button>
+                                </template>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- Controls Sidebar --}}
-                    <div style="display:flex; flex-direction:column; gap:14px">
+                    <div class="cropper-controls">
                         {{-- Crop Coordinates --}}
                         <div class="tool-panel">
                             <span class="field-label">Crop Area (px)</span>
@@ -1377,7 +1396,6 @@
                         </div>
                     </div>
                 </template>
-            </section>
             </section>
 
         </div>

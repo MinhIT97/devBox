@@ -85,7 +85,7 @@ window.devToolkitApp = function devToolkitApp() {
             { id: 'lorem',    title: 'Lorem Ipsum Gen',      description: 'Generate placeholder text for mockups and designs.' },
             { id: 'yaml',     title: 'YAML ↔ JSON',          description: 'Convert between YAML and JSON formats.' },
             { id: 'cert',     title: 'Certificate Decoder',  description: 'Decode X.509 certificates and view their details.' },
- { id: 'cropper', title: 'Image Cropper', description: 'Crop, resize, and export images in PNG/JPG/WebP.' },
+            { id: 'cropper', title: 'Image Cropper', description: 'Crop, resize, and export images in PNG/JPG/WebP.' },
         ],
         activeTool: loadFromLocalStorage('dev-toolkit.active-tool', null),
         toolSearch: '',
@@ -338,13 +338,24 @@ window.devToolkitApp = function devToolkitApp() {
             error: '',
         },
 
-         cropperTool: {
+        cropperHandles: ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'],
+        cropperTool: {
              inputName: '',
              imageSrc: '',
              naturalWidth: 0,
              naturalHeight: 0,
              aspectRatio: 'free',
              crop: { x: 0, y: 0, width: 0, height: 0 },
+             stage: { width: 0, height: 0 },
+             interaction: {
+                 active: false,
+                 mode: '',
+                 handle: '',
+                 startX: 0,
+                 startY: 0,
+                 startCrop: null,
+             },
+             draggingUpload: false,
              outputFormat: 'image/png',
              quality: 92,
              resizeEnabled: false,
@@ -358,6 +369,9 @@ window.devToolkitApp = function devToolkitApp() {
 
         init() {
             document.documentElement.classList.toggle('dark', this.dark);
+            this.boundCropperPointerMove = (event) => this.handleCropperPointerMove(event);
+            this.boundCropperPointerUp = () => this.endCropperInteraction();
+            window.addEventListener('resize', () => this.syncCropperStage());
 
             // Initialize tool filters
             this.filterTools();
@@ -409,6 +423,9 @@ window.devToolkitApp = function devToolkitApp() {
             this.filterTools();
             this.showMobileMenu = false;
             saveToLocalStorage('dev-toolkit.active-tool', toolId || '');
+            if (toolId === 'cropper') {
+                this.$nextTick(() => this.syncCropperStage());
+            }
         },
 
         // Tool search & filter
@@ -979,6 +996,12 @@ window.devToolkitApp = function devToolkitApp() {
             await this.loadCropperImage(file);
             event.target.value = '';
         },
+        async onCropperDrop(event) {
+            this.cropperTool.draggingUpload = false;
+            const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
+            if (!file) return;
+            await this.loadCropperImage(file);
+        },
         async loadCropperImage(file) {
             this.cropperTool.error = '';
             this.cropperTool.result = null;
@@ -999,10 +1022,134 @@ window.devToolkitApp = function devToolkitApp() {
                 this.cropperTool.resizeWidth = image.naturalWidth;
                 this.cropperTool.resizeHeight = image.naturalHeight;
                 this.cropperTool.message = 'Image loaded. Drag on the canvas to adjust the crop area.';
+                this.$nextTick(() => this.syncCropperStage());
             } catch (e) {
                 this.cropperTool.error = e.message;
                 this.cropperTool.message = '';
             }
+        },
+        syncCropperStage() {
+            const stage = this.$refs.cropperStage;
+            if (!stage) return;
+            const rect = stage.getBoundingClientRect();
+            this.cropperTool.stage = {
+                width: rect.width,
+                height: rect.height,
+            };
+        },
+        cropperScale() {
+            const W = this.cropperTool.naturalWidth || 1;
+            const H = this.cropperTool.naturalHeight || 1;
+            const stageW = this.cropperTool.stage.width || W;
+            const stageH = this.cropperTool.stage.height || H;
+            return {
+                x: stageW / W,
+                y: stageH / H,
+            };
+        },
+        cropperSelectionStyle() {
+            const scale = this.cropperScale();
+            const crop = this.cropperTool.crop;
+            return [
+                'left:' + (crop.x * scale.x) + 'px',
+                'top:' + (crop.y * scale.y) + 'px',
+                'width:' + (crop.width * scale.x) + 'px',
+                'height:' + (crop.height * scale.y) + 'px',
+            ].join(';');
+        },
+        pointToCropperCoords(event) {
+            const stage = this.$refs.cropperStage;
+            if (!stage) return { x: 0, y: 0 };
+            const rect = stage.getBoundingClientRect();
+            const scale = this.cropperScale();
+            return {
+                x: (event.clientX - rect.left) / scale.x,
+                y: (event.clientY - rect.top) / scale.y,
+            };
+        },
+        beginCropperInteraction(event, mode, handle = '') {
+            if (!this.cropperTool.imageSrc) return;
+            this.syncCropperStage();
+            const point = this.pointToCropperCoords(event);
+            this.cropperTool.interaction = {
+                active: true,
+                mode,
+                handle,
+                startX: point.x,
+                startY: point.y,
+                startCrop: { ...this.cropperTool.crop },
+            };
+            event.target.setPointerCapture?.(event.pointerId);
+            window.addEventListener('pointermove', this.boundCropperPointerMove);
+            window.addEventListener('pointerup', this.boundCropperPointerUp, { once: true });
+        },
+        startCropperDraw(event) {
+            if (event.button !== undefined && event.button !== 0) return;
+            this.cropperTool.aspectRatio = 'free';
+            const point = this.pointToCropperCoords(event);
+            this.cropperTool.crop = {
+                x: Math.round(point.x),
+                y: Math.round(point.y),
+                width: 1,
+                height: 1,
+            };
+            this.beginCropperInteraction(event, 'draw', 'se');
+        },
+        startCropperMove(event) {
+            if (event.button !== undefined && event.button !== 0) return;
+            this.beginCropperInteraction(event, 'move');
+        },
+        startCropperResize(event, handle) {
+            if (event.button !== undefined && event.button !== 0) return;
+            this.cropperTool.aspectRatio = 'free';
+            this.beginCropperInteraction(event, 'resize', handle);
+        },
+        handleCropperPointerMove(event) {
+            const interaction = this.cropperTool.interaction;
+            if (!interaction.active || !interaction.startCrop) return;
+            const point = this.pointToCropperCoords(event);
+            const dx = point.x - interaction.startX;
+            const dy = point.y - interaction.startY;
+            const crop = interaction.startCrop;
+            let next = { ...crop };
+
+            if (interaction.mode === 'move') {
+                next.x = crop.x + dx;
+                next.y = crop.y + dy;
+            } else if (interaction.mode === 'draw') {
+                next = this.cropRectFromEdges(crop.x, crop.y, crop.x + dx, crop.y + dy);
+            } else if (interaction.mode === 'resize') {
+                const left = interaction.handle.includes('w') ? crop.x + dx : crop.x;
+                const top = interaction.handle.includes('n') ? crop.y + dy : crop.y;
+                const right = interaction.handle.includes('e') ? crop.x + crop.width + dx : crop.x + crop.width;
+                const bottom = interaction.handle.includes('s') ? crop.y + crop.height + dy : crop.y + crop.height;
+                next = this.cropRectFromEdges(left, top, right, bottom);
+            }
+
+            this.onCropRectChange(next);
+        },
+        endCropperInteraction() {
+            window.removeEventListener('pointermove', this.boundCropperPointerMove);
+            this.cropperTool.interaction = {
+                active: false,
+                mode: '',
+                handle: '',
+                startX: 0,
+                startY: 0,
+                startCrop: null,
+            };
+        },
+        cropRectFromEdges(left, top, right, bottom) {
+            const x1 = Math.min(left, right);
+            const y1 = Math.min(top, bottom);
+            const x2 = Math.max(left, right);
+            const y2 = Math.max(top, bottom);
+            return {
+                x: x1,
+                y: y1,
+                width: x2 - x1,
+                height: y2 - y1,
+            };
         },
         setCropperAspect(ratio) {
             this.cropperTool.aspectRatio = ratio;
@@ -1045,11 +1192,12 @@ window.devToolkitApp = function devToolkitApp() {
             // Clamp to image bounds
             const W = this.cropperTool.naturalWidth;
             const H = this.cropperTool.naturalHeight;
-            let x = Math.max(0, Math.min(Number(rect.x) || 0, W - 1));
-            let y = Math.max(0, Math.min(Number(rect.y) || 0, H - 1));
-            let w = Math.max(1, Math.min(Number(rect.width) || 1, W - x));
-            let h = Math.max(1, Math.min(Number(rect.height) || 1, H - y));
+            let w = Math.max(1, Math.min(Math.round(Number(rect.width) || 1), W));
+            let h = Math.max(1, Math.min(Math.round(Number(rect.height) || 1), H));
+            let x = Math.max(0, Math.min(Math.round(Number(rect.x) || 0), W - w));
+            let y = Math.max(0, Math.min(Math.round(Number(rect.y) || 0), H - h));
             this.cropperTool.crop = { x, y, width: w, height: h };
+            this.cropperTool.result = null;
         },
         setCropperFormat(format) {
             this.cropperTool.outputFormat = format;
@@ -1142,14 +1290,18 @@ window.devToolkitApp = function devToolkitApp() {
             this.cropperTool.result = null;
             this.cropperTool.error = '';
             this.cropperTool.message = this.cropperTool.imageSrc ? 'Image loaded. Drag on the canvas to adjust the crop area.' : 'Upload an image to start cropping.';
+            this.$nextTick(() => this.syncCropperStage());
         },
         clearCropper() {
+            this.endCropperInteraction();
             this.cropperTool.inputName = '';
             this.cropperTool.imageSrc = '';
             this.cropperTool.naturalWidth = 0;
             this.cropperTool.naturalHeight = 0;
             this.cropperTool.aspectRatio = 'free';
             this.cropperTool.crop = { x: 0, y: 0, width: 0, height: 0 };
+            this.cropperTool.stage = { width: 0, height: 0 };
+            this.cropperTool.draggingUpload = false;
             this.cropperTool.outputFormat = 'image/png';
             this.cropperTool.quality = 92;
             this.cropperTool.resizeEnabled = false;
@@ -1262,6 +1414,7 @@ window.devToolkitApp = function devToolkitApp() {
             }, 1600);
 
         },
+        formatBytes,
     };
 };
 
