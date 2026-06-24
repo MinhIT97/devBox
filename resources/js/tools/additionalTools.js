@@ -884,3 +884,105 @@ function parseTime() {
     }
     return timeStr;
 }
+
+// ─── Image Cropper ───
+// Load a File/Blob into an HTMLImageElement (resolved) and ImageBitmap-like meta.
+export function loadImageFromFile(file) {
+ return new Promise((resolve, reject) => {
+ if (!file || !file.type || !file.type.startsWith('image/')) {
+ reject(new Error('Please choose a valid image file (PNG, JPG, GIF, WebP, BMP).'));
+ return;
+ }
+ const reader = new FileReader();
+ reader.onerror = () => reject(new Error('Failed to read file.'));
+ reader.onload = (e) => {
+ const img = new Image();
+ img.onload = () => resolve({ image: img, dataUrl: e.target.result });
+ img.onerror = () => reject(new Error('Failed to decode image. The file may be corrupted.'));
+ img.src = e.target.result;
+ };
+ reader.readAsDataURL(file);
+ });
+}
+
+// Crop an image using pixel coordinates from the original image.
+// crop = { x, y, width, height } in source image pixels
+// resize = { width, height } | null (optional output dimensions)
+// format = 'image/png' | 'image/jpeg' | 'image/webp'
+// quality = 0..1 (ignored for PNG)
+export async function cropImage(image, crop, resize, format = 'image/png', quality = 0.92) {
+ if (!image || !image.naturalWidth) throw new Error('No image loaded.');
+ if (!crop || crop.width <= 0 || crop.height <= 0) {
+ throw new Error('Invalid crop area.');
+ }
+
+ // Clamp crop to image bounds
+ const x = Math.max(0, Math.floor(crop.x));
+ const y = Math.max(0, Math.floor(crop.y));
+ const width = Math.min(Math.floor(crop.width), image.naturalWidth - x);
+ const height = Math.min(Math.floor(crop.height), image.naturalHeight - y);
+
+ if (width <= 0 || height <= 0) throw new Error('Crop area is outside the image.');
+
+ const outputW = resize && resize.width ? Math.max(1, Math.floor(resize.width)) : width;
+ const outputH = resize && resize.height ? Math.max(1, Math.floor(resize.height)) : height;
+
+ const canvas = document.createElement('canvas');
+ canvas.width = outputW;
+ canvas.height = outputH;
+ const ctx = canvas.getContext('2d');
+ if (!ctx) throw new Error('Canvas is not supported in this browser.');
+
+ // High-quality scaling
+ ctx.imageSmoothingEnabled = true;
+ ctx.imageSmoothingQuality = 'high';
+
+ ctx.drawImage(image, x, y, width, height, 0, 0, outputW, outputH);
+
+ const mime = ['image/png', 'image/jpeg', 'image/webp'].includes(format) ? format : 'image/png';
+ const q = mime === 'image/png' ? undefined : Math.min(1, Math.max(0.1, Number(quality) || 0.92));
+
+ const blob = await new Promise((resolve, reject) => {
+ canvas.toBlob(
+ (b) => (b ? resolve(b) : reject(new Error('Failed to encode image.'))),
+ mime,
+ q
+ );
+ });
+
+ const dataUrl = canvas.toDataURL(mime, q);
+
+ return {
+ blob,
+ dataUrl,
+ width: outputW,
+ height: outputH,
+ format: mime,
+ size: blob.size,
+ };
+}
+
+// Trigger a browser download for a Blob with a chosen filename.
+export function downloadBlob(blob, filename) {
+ const url = URL.createObjectURL(blob);
+ const a = document.createElement('a');
+ a.href = url;
+ a.download = filename || 'image.png';
+ document.body.appendChild(a);
+ a.click();
+ document.body.removeChild(a);
+ setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// Format a byte count into a human-readable string (e.g. 1.4 MB).
+export function formatBytes(bytes) {
+ if (!bytes || bytes < 0) return '0 B';
+ const units = ['B', 'KB', 'MB', 'GB'];
+ let i = 0;
+ let value = bytes;
+ while (value >= 1024 && i < units.length - 1) {
+ value /= 1024;
+ i++;
+ }
+ return `${value.toFixed(value >= 100 || i === 0 ? 0 : 1)} ${units[i]}`;
+}

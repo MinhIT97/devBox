@@ -1227,6 +1227,157 @@
                         </div>
                     </div>
                 </template>
+
+            {{-- ── Image Cropper ── }}
+            <section x-show="activeTool === 'cropper'" x-cloak class="tool-section-enter">
+                <div class="toolbar">
+                    <button id="cropper-crop-btn" type="button" class="btn-primary" @click="runCropImage()" :disabled="!cropperTool.imageSrc || cropperTool.processing">
+                        <span x-show="!cropperTool.processing">Crop</span>
+                        <span x-show="cropperTool.processing">Processing...</span>
+                    </button>
+                    <button id="cropper-dl-btn" type="button" class="btn" @click="downloadCroppedImage()" :disabled="!cropperTool.result">Download</button>
+                    <button id="cropper-copy-btn" type="button" class="btn" @click="copyCroppedImage()" :disabled="!cropperTool.result">Copy</button>
+                    <button id="cropper-reset-btn" type="button" class="btn" @click="resetCropper()" :disabled="!cropperTool.imageSrc">Reset</button>
+                    <button id="cropper-clear-btn" type="button" class="btn-danger" @click="clearInput('cropper')">Clear</button>
+                </div>
+
+                {{-- Upload Area --}}
+                <div x-show="!cropperTool.imageSrc" class="tool-panel" style="text-align:center; padding:56px 24px; border:2px dashed var(--border); border-radius:var(--radius-xl)">
+                    <label for="cropper-file-input" style="display:block; cursor:pointer; width:100%">
+                        <svg style="display:block; margin:0 auto 16px; color:var(--accent); opacity:0.5" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        <span style="color:var(--text-muted); font-size:14px">Click or drag to upload an image</span><br>
+                        <span style="color:var(--text-muted); font-size:11px; margin-top:4px; display:inline-block">PNG, JPG, GIF, WebP, BMP — up to 20 MB</span>
+                    </label>
+                    <input type="file" id="cropper-file-input" accept="image/png,image/jpeg,image/gif,image/webp,image/bmp" style="display:none" @change="onCropperFileChange($event)">
+                </div>
+
+                {{-- Main Crop Area --}}
+                <div x-show="cropperTool.imageSrc" style="display:grid; gap:16px; grid-template-columns: 1fr 300px">
+                    {{-- Image Preview with Crop Overlay --}}
+                    <div class="tool-panel" style="position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; min-height:380px; background:repeating-conic-gradient(var(--border) 0% 25%, transparent 0% 50%) 50% / 20px 20px">
+                        {{-- Image --}}
+                        <img :src="cropperTool.imageSrc" style="display:block; max-width:100%; max-height:600px; position:relative; z-index:1" :id="'cropper-img'" class="cropper-img">
+                        {{-- Dark overlay: top strip --}}
+                        <div style="position:absolute; top:0; left:0; right:0; background:rgba(0,0,0,0.55); z-index:2"
+                            :style="'height:' + (Math.max(0, cropperTool.crop.y) / cropperTool.naturalHeight * 100) + '%'"></div>
+                        {{-- Dark overlay: bottom strip --}}
+                        <div style="position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.55); z-index:2"
+                            :style="'height:' + (Math.max(0, (cropperTool.naturalHeight - cropperTool.crop.y - cropperTool.crop.height)) / cropperTool.naturalHeight * 100) + '%'"></div>
+                        {{-- Dark overlay: left strip --}}
+                        <div style="position:absolute; top:0; bottom:0; left:0; background:rgba(0,0,0,0.55); z-index:2"
+                            :style="'width:' + (Math.max(0, cropperTool.crop.x) / cropperTool.naturalWidth * 100) + '%'"></div>
+                        {{-- Dark overlay: right strip --}}
+                        <div style="position:absolute; top:0; bottom:0; right:0; background:rgba(0,0,0,0.55); z-index:2"
+                            :style="'width:' + (Math.max(0, (cropperTool.naturalWidth - cropperTool.crop.x - cropperTool.crop.width)) / cropperTool.naturalWidth * 100) + '%'"></div>
+                        {{-- Crop border --}}
+                        <div style="position:absolute; border:2px dashed #fff; z-index:3; pointer-events:none; box-shadow:0 0 0 9999px rgba(0,0,0,0)"
+                            :style="'left:' + (cropperTool.crop.x / cropperTool.naturalWidth * 100) + '%;top:' + (cropperTool.crop.y / cropperTool.naturalHeight * 100) + '%;width:' + (cropperTool.crop.width / cropperTool.naturalWidth * 100) + '%;height:' + (cropperTool.crop.height / cropperTool.naturalHeight * 100) + '%'"></div>
+                    </div>
+
+                    {{-- Controls Sidebar --}}
+                    <div style="display:flex; flex-direction:column; gap:14px">
+                        {{-- Crop Coordinates --}}
+                        <div class="tool-panel">
+                            <span class="field-label">Crop Area (px)</span>
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px">
+                                <div>
+                                    <span style="font-size:10px; color:var(--text-muted)">X</span>
+                                    <input type="number" class="input-shell" style="width:100%" x-model="cropperTool.crop.x" min="0" @input="onCropRectChange({x: cropperTool.crop.x, y: cropperTool.crop.y, width: cropperTool.crop.width, height: cropperTool.crop.height})">
+                                </div>
+                                <div>
+                                    <span style="font-size:10px; color:var(--text-muted)">Y</span>
+                                    <input type="number" class="input-shell" style="width:100%" x-model="cropperTool.crop.y" min="0" @input="onCropRectChange({x: cropperTool.crop.x, y: cropperTool.crop.y, width: cropperTool.crop.width, height: cropperTool.crop.height})">
+                                </div>
+                                <div>
+                                    <span style="font-size:10px; color:var(--text-muted)">Width</span>
+                                    <input type="number" class="input-shell" style="width:100%" x-model="cropperTool.crop.width" min="1" @input="onCropRectChange({x: cropperTool.crop.x, y: cropperTool.crop.y, width: cropperTool.crop.width, height: cropperTool.crop.height})">
+                                </div>
+                                <div>
+                                    <span style="font-size:10px; color:var(--text-muted)">Height</span>
+                                    <input type="number" class="input-shell" style="width:100%" x-model="cropperTool.crop.height" min="1" @input="onCropRectChange({x: cropperTool.crop.x, y: cropperTool.crop.y, width: cropperTool.crop.width, height: cropperTool.crop.height})">
+                                </div>
+                            </div>
+                            <div style="font-size:10px; color:var(--text-muted); margin-top:8px">
+                                Image: <strong x-text="cropperTool.naturalWidth + ' × ' + cropperTool.naturalHeight"></strong>
+                            </div>
+                        </div>
+
+                        {{-- Aspect Ratio --}}
+                        <div class="tool-panel">
+                            <span class="field-label">Aspect Ratio</span>
+                            <div style="display:flex; flex-wrap:wrap; gap:6px">
+                                <template x-for="ratio in [{id:'free',label:'Free'},{id:'1:1',label:'1:1'},{id:'4:3',label:'4:3'},{id:'16:9',label:'16:9'},{id:'3:2',label:'3:2'}]" :key="ratio.id">
+                                    <button type="button" class="btn" style="min-height:28px;padding:0 10px;font-size:11px"
+                                        :class="{ 'btn-primary': cropperTool.aspectRatio === ratio.id }"
+                                        @click="setCropperAspect(ratio.id)"
+                                        x-text="ratio.label"
+                                        :disabled="!cropperTool.imageSrc"></button>
+                                </template>
+                            </div>
+                        </div>
+
+                        {{-- Output Format --}}
+                        <div class="tool-panel">
+                            <span class="field-label">Format</span>
+                            <select class="select-shell" x-model="cropperTool.outputFormat" @change="setCropperFormat(cropperTool.outputFormat)" style="width:100%">
+                                <option value="image/png">PNG</option>
+                                <option value="image/jpeg">JPEG</option>
+                                <option value="image/webp">WebP</option>
+                            </select>
+                        </div>
+
+                        {{-- Quality --}}
+                        <div class="tool-panel" x-show="cropperTool.outputFormat !== 'image/png'">
+                            <span class="field-label">Quality: <span x-text="cropperTool.quality + '%'"></span></span>
+                            <input type="range" x-model="cropperTool.quality" min="10" max="100" step="5" @input="setCropperQuality(cropperTool.quality)" style="width:100%; accent-color:var(--accent)">
+                        </div>
+
+                        {{-- Resize --}}
+                        <div class="tool-panel">
+                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer">
+                                <input type="checkbox" x-model="cropperTool.resizeEnabled" style="accent-color:var(--accent)">
+                                <span class="field-label" style="margin-bottom:0">Resize Output</span>
+                            </label>
+                            <div x-show="cropperTool.resizeEnabled" style="display:flex; gap:8px; margin-top:8px; align-items:center">
+                                <input type="number" class="input-shell" x-model="cropperTool.resizeWidth" min="1" max="4096" @input="setCropperResizeWidth(cropperTool.resizeWidth)" style="width:80px" placeholder="W">
+                                <span style="color:var(--text-muted); font-size:12px">&times;</span>
+                                <input type="number" class="input-shell" x-model="cropperTool.resizeHeight" min="1" max="4096" @input="setCropperResizeHeight(cropperTool.resizeHeight)" style="width:80px" placeholder="H">
+                                <span style="color:var(--text-muted); font-size:11px">px</span>
+                            </div>
+                        </div>
+
+                        {{-- Error / Message --}}
+                        <div x-show="cropperTool.error" class="json-share-error" style="margin-top:0" x-text="cropperTool.error"></div>
+                        <p x-show="cropperTool.message && !cropperTool.error && cropperTool.imageSrc" class="json-status json-status-ok" style="margin-top:0; font-size:11px" x-text="cropperTool.message"></p>
+
+                        {{-- File Info --}}
+                        <div class="tool-panel" style="font-size:10px; color:var(--text-muted); display:flex; align-items:center; justify-content:space-between">
+                            <span x-text="cropperTool.inputName" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px"></span>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Result Section --}}
+                <template x-if="cropperTool.result">
+                    <div style="display:grid; gap:16px; grid-template-columns: auto 1fr; margin-top:16px; align-items:start">
+                        <div class="tool-panel tool-panel-accent" style="padding:12px">
+                            <img :src="cropperTool.result.dataUrl" style="display:block; max-width:200px; max-height:200px; border-radius:var(--radius-md)" alt="Cropped result">
+                        </div>
+                        <div class="tool-panel" style="display:flex; flex-direction:column; gap:8px; justify-content:center">
+                            <span class="field-label">Cropped Result</span>
+                            <div style="font-size:12px; color:var(--text-muted); display:flex; gap:20px; flex-wrap:wrap">
+                                <span><strong x-text="cropperTool.result.width + ' × ' + cropperTool.result.height"></strong> px</span>
+                                <span><strong x-text="formatBytes(cropperTool.result.size)"></strong></span>
+                                <span style="text-transform:uppercase" x-text="cropperTool.result.format.split('/')[1]"></span>
+                            </div>
+                            <div style="display:flex; gap:8px; margin-top:4px">
+                                <button type="button" class="btn" style="min-height:30px;padding:0 14px;font-size:12px" @click="downloadCroppedImage()">Download</button>
+                                <button type="button" class="btn" style="min-height:30px;padding:0 14px;font-size:12px" @click="copyCroppedImage()">Copy to Clipboard</button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </section>
             </section>
 
         </div>

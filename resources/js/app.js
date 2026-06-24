@@ -33,6 +33,10 @@ import {
     yamlToJson,
     jsonToYaml,
     decodeCertificate,
+ loadImageFromFile,
+ cropImage,
+ downloadBlob,
+ formatBytes,
 } from './tools/additionalTools';
 
 window.devToolkitApp = function devToolkitApp() {
@@ -58,6 +62,7 @@ window.devToolkitApp = function devToolkitApp() {
             lorem: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
             yaml: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M10 9H8v6h2"/><path d="M16 13h-4l4-4v6"/></svg>`,
             cert: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>`,
+ cropper: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v4H2"/><path d="M18 2v4h4"/><path d="M22 18v4h-4"/><path d="M2 18v4h4"/><circle cx="12" cy="12" r="3"/></svg>`,
         },
         tools: [
             { id: 'json',     title: 'JSON Formatter',      description: 'Format, minify & validate JSON.' },
@@ -80,6 +85,7 @@ window.devToolkitApp = function devToolkitApp() {
             { id: 'lorem',    title: 'Lorem Ipsum Gen',      description: 'Generate placeholder text for mockups and designs.' },
             { id: 'yaml',     title: 'YAML ↔ JSON',          description: 'Convert between YAML and JSON formats.' },
             { id: 'cert',     title: 'Certificate Decoder',  description: 'Decode X.509 certificates and view their details.' },
+ { id: 'cropper', title: 'Image Cropper', description: 'Crop, resize, and export images in PNG/JPG/WebP.' },
         ],
         activeTool: loadFromLocalStorage('dev-toolkit.active-tool', null),
         toolSearch: '',
@@ -106,6 +112,7 @@ window.devToolkitApp = function devToolkitApp() {
             lorem: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
             yaml: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M10 9H8v6h2"/><path d="M16 13h-4l4-4v6"/></svg>`,
             cert: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>`,
+ cropper: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v4H2"/><path d="M18 2v4h4"/><path d="M22 18v4h-4"/><path d="M2 18v4h4"/><circle cx="12" cy="12" r="3"/></svg>`,
         },
         toolInfoTips: {
             json: {
@@ -188,6 +195,10 @@ window.devToolkitApp = function devToolkitApp() {
                 what: 'Decode X.509 SSL/TLS certificates. Paste a PEM file to extract issuer, subject, validity period, and serial number.',
                 tip: 'Use this to check when a certificate <strong>expires</strong>, verify the <strong>issuer</strong>, or debug SSL chain issues. The cert data never leaves your browser.',
             },
+ cropper: {
+ what: 'Crop, resize, and export images. Everything runs in your browser — your images never leave the device.',
+ tip: 'Use <strong>aspect ratios</strong> (1:1, 4:3, 16:9) for social media presets. Enable <strong>Resize</strong> to scale the output. Choose <strong>PNG</strong> for transparency, <strong>JPG</strong> for smaller files, <strong>WebP</strong> for the best of both.',
+ },
         },
         showToolInfo: true,
         showMobileMenu: false,
@@ -327,6 +338,24 @@ window.devToolkitApp = function devToolkitApp() {
             error: '',
         },
 
+         cropperTool: {
+             inputName: '',
+             imageSrc: '',
+             naturalWidth: 0,
+             naturalHeight: 0,
+             aspectRatio: 'free',
+             crop: { x: 0, y: 0, width: 0, height: 0 },
+             outputFormat: 'image/png',
+             quality: 92,
+             resizeEnabled: false,
+             resizeWidth: 0,
+             resizeHeight: 0,
+             result: null,
+             processing: false,
+             error: '',
+             message: 'Upload an image to start cropping.',
+         },
+
         init() {
             document.documentElement.classList.toggle('dark', this.dark);
 
@@ -386,7 +415,7 @@ window.devToolkitApp = function devToolkitApp() {
         filterTools() {
             const query = (this.toolSearch || '').toLowerCase().trim();
             const formatterIds = ['json', 'html', 'diff', 'case', 'constant', 'bem', 'sql'];
-            const converterIds = ['base64', 'url', 'jwt', 'uuid', 'epoch', 'regex', 'color', 'ip', 'hash', 'qrcode', 'lorem', 'yaml', 'cert'];
+            const converterIds = ['base64', 'url', 'jwt', 'uuid', 'epoch', 'regex', 'color', 'ip', 'hash', 'qrcode', 'lorem', 'yaml', 'cert', 'cropper'];
 
             const match = (tool) => {
                 if (!query) return true;
@@ -423,7 +452,8 @@ window.devToolkitApp = function devToolkitApp() {
                 qrcode:   '',
                 lorem:    'Ctrl+Enter  Generate',
                 yaml:     '',
-                cert:     'Ctrl+Enter  Decode',
+                cert: 'Ctrl+Enter Decode',
+ cropper: 'Ctrl+Enter Crop',
             };
             return hints[tool.id] || '';
         },
@@ -479,7 +509,8 @@ window.devToolkitApp = function devToolkitApp() {
                 lorem: () => this.generateLorem(),
                 yaml: () => this.runYamlToJson(),
                 cert: () => this.runCertDecode(),
-            };
+                cropper: () => this.runCropImage(),
+ };
             const action = actions[this.activeTool];
             if (action) {
                 action();
@@ -941,6 +972,194 @@ window.devToolkitApp = function devToolkitApp() {
             }
         },
 
+        // Image Cropper
+        async onCropperFileChange(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+            await this.loadCropperImage(file);
+            event.target.value = '';
+        },
+        async loadCropperImage(file) {
+            this.cropperTool.error = '';
+            this.cropperTool.result = null;
+            this.cropperTool.message = 'Loading image...';
+            try {
+                const { image, dataUrl } = await loadImageFromFile(file);
+                this.cropperTool.inputName = file.name;
+                this.cropperTool.imageSrc = dataUrl;
+                this.cropperTool.naturalWidth = image.naturalWidth;
+                this.cropperTool.naturalHeight = image.naturalHeight;
+                // Default crop = full image
+                this.cropperTool.crop = {
+                    x: 0,
+                    y: 0,
+                    width: image.naturalWidth,
+                    height: image.naturalHeight,
+                };
+                this.cropperTool.resizeWidth = image.naturalWidth;
+                this.cropperTool.resizeHeight = image.naturalHeight;
+                this.cropperTool.message = 'Image loaded. Drag on the canvas to adjust the crop area.';
+            } catch (e) {
+                this.cropperTool.error = e.message;
+                this.cropperTool.message = '';
+            }
+        },
+        setCropperAspect(ratio) {
+            this.cropperTool.aspectRatio = ratio;
+            this.applyCropperAspect();
+        },
+        applyCropperAspect() {
+            if (!this.cropperTool.imageSrc) return;
+            const ratio = this.cropperTool.aspectRatio;
+            const W = this.cropperTool.naturalWidth;
+            const H = this.cropperTool.naturalHeight;
+            let targetRatio = null;
+            if (ratio === '1:1') targetRatio = 1;
+            else if (ratio === '4:3') targetRatio = 4 / 3;
+            else if (ratio === '16:9') targetRatio = 16 / 9;
+            else if (ratio === '3:2') targetRatio = 3 / 2;
+            else if (ratio === 'free') targetRatio = null;
+            if (!targetRatio) {
+                // Restore full image as crop
+                this.cropperTool.crop = { x: 0, y: 0, width: W, height: H };
+                return;
+            }
+            // Center a largest-fit crop with the chosen aspect ratio
+            const imgRatio = W / H;
+            let cropW, cropH;
+            if (imgRatio > targetRatio) {
+                cropH = H;
+                cropW = Math.round(H * targetRatio);
+            } else {
+                cropW = W;
+                cropH = Math.round(W / targetRatio);
+            }
+            this.cropperTool.crop = {
+                x: Math.round((W - cropW) / 2),
+                y: Math.round((H - cropH) / 2),
+                width: cropW,
+                height: cropH,
+            };
+        },
+        onCropRectChange(rect) {
+            // Clamp to image bounds
+            const W = this.cropperTool.naturalWidth;
+            const H = this.cropperTool.naturalHeight;
+            let x = Math.max(0, Math.min(Number(rect.x) || 0, W - 1));
+            let y = Math.max(0, Math.min(Number(rect.y) || 0, H - 1));
+            let w = Math.max(1, Math.min(Number(rect.width) || 1, W - x));
+            let h = Math.max(1, Math.min(Number(rect.height) || 1, H - y));
+            this.cropperTool.crop = { x, y, width: w, height: h };
+        },
+        setCropperFormat(format) {
+            this.cropperTool.outputFormat = format;
+        },
+        setCropperQuality(value) {
+            const v = Math.min(100, Math.max(1, Number(value) || 1));
+            this.cropperTool.quality = v;
+        },
+        setCropperResizeWidth(value) {
+            const v = Math.max(1, Math.floor(Number(value) || 1));
+            this.cropperTool.resizeWidth = v;
+        },
+        setCropperResizeHeight(value) {
+            const v = Math.max(1, Math.floor(Number(value) || 1));
+            this.cropperTool.resizeHeight = v;
+        },
+        async runCropImage() {
+            if (!this.cropperTool.imageSrc) {
+                this.cropperTool.error = 'Please upload an image first.';
+                return;
+            }
+            this.cropperTool.processing = true;
+            this.cropperTool.error = '';
+            this.cropperTool.result = null;
+            try {
+                // Re-load image to get a fresh HTMLImageElement
+                const img = new Image();
+                img.src = this.cropperTool.imageSrc;
+                await new Promise((resolve, reject) => {
+                    img.onload = resolve;
+                    img.onerror = () => reject(new Error('Failed to load image for crop.'));
+                });
+                const resize = this.cropperTool.resizeEnabled
+                    ? { width: this.cropperTool.resizeWidth, height: this.cropperTool.resizeHeight }
+                    : null;
+                const result = await cropImage(
+                    img,
+                    this.cropperTool.crop,
+                    resize,
+                    this.cropperTool.outputFormat,
+                    this.cropperTool.quality / 100
+                );
+                this.cropperTool.result = {
+                    dataUrl: result.dataUrl,
+                    width: result.width,
+                    height: result.height,
+                    size: result.size,
+                    format: result.format,
+                };
+                this.cropperTool.message = 'Cropped successfully.';
+            } catch (e) {
+                this.cropperTool.error = e.message;
+                this.cropperTool.message = '';
+            } finally {
+                this.cropperTool.processing = false;
+            }
+        },
+        downloadCroppedImage() {
+            if (!this.cropperTool.result) return;
+            const extMap = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
+            const ext = extMap[this.cropperTool.result.format] || 'png';
+            const baseName = (this.cropperTool.inputName || 'image').replace(/\\.[^.]+$/, '');
+            const filename = baseName + '-cropped-' + this.cropperTool.result.width + 'x' + this.cropperTool.result.height + '.' + ext;
+            // Convert dataURL to blob
+            fetch(this.cropperTool.result.dataUrl)
+                .then(r => r.blob())
+                .then(blob => {
+                    downloadBlob(blob, filename);
+                    this.showToast('Downloaded ' + filename);
+                });
+        },
+        copyCroppedImage() {
+            if (!this.cropperTool.result) return;
+            fetch(this.cropperTool.result.dataUrl)
+                .then(r => r.blob())
+                .then(blob => {
+                    if (navigator.clipboard && window.ClipboardItem) {
+                        const item = new ClipboardItem({ [blob.type]: blob });
+                        return navigator.clipboard.write([item]);
+                    }
+                    throw new Error('Clipboard image not supported in this browser.');
+                })
+                .then(() => this.showToast('Image copied to clipboard!'))
+                .catch(e => this.showToast(e.message));
+        },
+        resetCropper() {
+            const w = this.cropperTool.naturalWidth;
+            const h = this.cropperTool.naturalHeight;
+            this.cropperTool.crop = { x: 0, y: 0, width: w, height: h };
+            this.cropperTool.result = null;
+            this.cropperTool.error = '';
+            this.cropperTool.message = this.cropperTool.imageSrc ? 'Image loaded. Drag on the canvas to adjust the crop area.' : 'Upload an image to start cropping.';
+        },
+        clearCropper() {
+            this.cropperTool.inputName = '';
+            this.cropperTool.imageSrc = '';
+            this.cropperTool.naturalWidth = 0;
+            this.cropperTool.naturalHeight = 0;
+            this.cropperTool.aspectRatio = 'free';
+            this.cropperTool.crop = { x: 0, y: 0, width: 0, height: 0 };
+            this.cropperTool.outputFormat = 'image/png';
+            this.cropperTool.quality = 92;
+            this.cropperTool.resizeEnabled = false;
+            this.cropperTool.resizeWidth = 0;
+            this.cropperTool.resizeHeight = 0;
+            this.cropperTool.result = null;
+            this.cropperTool.processing = false;
+            this.cropperTool.error = '';
+            this.cropperTool.message = 'Upload an image to start cropping.';
+        },
         // Clear utilities
         clearInput(toolId) {
             if (toolId === 'json') {
@@ -1026,6 +1245,9 @@ window.devToolkitApp = function devToolkitApp() {
                 this.certTool.result = null;
                 this.certTool.error = '';
             }
+            else if (toolId === 'cropper') {
+                this.clearCropper();
+            }
         },
 
         copy(value) {
@@ -1038,6 +1260,7 @@ window.devToolkitApp = function devToolkitApp() {
             this.toastTimer = setTimeout(() => {
                 this.toast = '';
             }, 1600);
+
         },
     };
 };
